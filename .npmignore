@@ -1,2 +1,6 @@
 src/
 node_modules/
+docs/
+
+test.ts
+tsconfig.json

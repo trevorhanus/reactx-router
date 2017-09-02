@@ -1,2 +1,0 @@
-import {MessagesStore, Message} from './';
-

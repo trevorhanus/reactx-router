@@ -25,6 +25,11 @@ export class MessagesStore {
         this._messages.clear();
     }
 
+    @computed
+    get length(): number {
+        return this._messages.size;
+    }
+
     @action
     remove(id: string): void {
         this._messages.delete(id);
