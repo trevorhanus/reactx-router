@@ -1,5 +1,4 @@
-// Karma configuration
-// Generated on Fri Sep 01 2017 16:56:43 GMT-0700 (PDT)
+var path = require('path');
 
 module.exports = function (config) {
     config.set({
@@ -9,17 +8,36 @@ module.exports = function (config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['mocha', 'chai', 'karma-typescript'],
+        frameworks: ['mocha', 'chai'],
 
         // list of files / patterns to load in the browser
         files: [
-            'test/**/*test.ts'
+            'test/**/*.test.ts'
+        ],
+
+        exclude: [
+            'node_modules/'
         ],
 
         // preprocess matching files before serving them to the browser
         // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
         preprocessors: {
-            '**/*.ts': ['karma-typescript']
+            '**/*.ts': ['webpack'],
+            '**/*.tsx': ['webpack']
+        },
+        webpack: {
+            module: {
+                loaders: [
+                    {
+                        test: /\.tsx?$/,
+                        loaders: ['awesome-typescript-loader'],
+                        include: path.join(__dirname, 'src')
+                    }
+                ]
+            },
+            resolve: {
+                extensions: ['.ts', '.tsx', '.js']
+            }
         },
 
         // test results reporter to use
