@@ -33,6 +33,11 @@ export class Router implements IRouter {
     }
 
     @computed
+    get currentRoute(): Route {
+        return this._currentRoute;
+    }
+
+    @computed
     get currentViewState(): IViewState {
         return this._currentRoute !== null ? this._currentRoute.viewState : null;
     }

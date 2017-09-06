@@ -1,5 +1,6 @@
 import {router} from './router/Router';
 import {Route, IRouteConfig, IViewState} from './router/Route';
+import {MobxRouter as Router} from './router/RouterComponent';
 
 import {MessagesStore} from './messages/MessagesStore';
 import {Message} from './messages/Message';
@@ -11,6 +12,7 @@ import {AbstractReversibleAction as ReversibleAction} from './actions/AbstractRe
 export {
     router,
     Route,
+    Router,
     IRouteConfig,
     IViewState,
 

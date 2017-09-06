@@ -4,7 +4,7 @@ import {router} from './Router';
 
 const MobxRouter = observer(() => {
     return (
-        <router.currentView.component/>
+        <router.currentRoute.component />
     )
 });
 
