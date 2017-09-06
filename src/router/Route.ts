@@ -8,10 +8,10 @@ export interface IRouteConfig {
     component: any;
     name: string;
     route: string;
-    beforeEnter?: (state: IViewState) => void;
-    onEnter?: (state: IViewState) => void;
-    beforeExit?: (state: IViewState) => void;
-    onExit?: (state: IViewState) => void;
+    beforeEnter?: (state: IViewState) => boolean;
+    onEnter?: (state: IViewState) => boolean;
+    beforeExit?: (state: IViewState) => boolean;
+    onExit?: (state: IViewState) => boolean;
 }
 
 export class Route {
@@ -19,10 +19,10 @@ export class Route {
     route: string;
     name: string;
     component: Component;
-    beforeEnter: (state: IViewState) => void;
-    onEnter: (state: IViewState) => void;
-    beforeExit: (state: IViewState) => void;
-    onExit: (state: IViewState) => void;
+    beforeEnter: (state: IViewState) => boolean;
+    onEnter: (state: IViewState) => boolean;
+    beforeExit: (state: IViewState) => boolean;
+    onExit: (state: IViewState) => boolean;
     @observable private _params: IParams;
 
     constructor(config: IRouteConfig) {

@@ -10,6 +10,17 @@ module.exports = function (config) {
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         frameworks: ['mocha', 'chai'],
 
+        // plugins: [
+        //     require('karma-mocha'),
+        //     require('karma-webpack'),
+        //     require('karma-chai')
+        // ],
+
+        mime: {
+            'text/x-typescript': ['ts','tsx']
+        },
+
+
         // list of files / patterns to load in the browser
         files: [
             'test/**/*.test.ts'
@@ -26,12 +37,12 @@ module.exports = function (config) {
             '**/*.tsx': ['webpack']
         },
         webpack: {
+            devtool: 'eval',
             module: {
                 loaders: [
                     {
                         test: /\.tsx?$/,
-                        loaders: ['awesome-typescript-loader'],
-                        include: path.join(__dirname, 'src')
+                        loaders: ['awesome-typescript-loader']
                     }
                 ]
             },
@@ -43,7 +54,7 @@ module.exports = function (config) {
         // test results reporter to use
         // possible values: 'dots', 'progress'
         // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['progress', 'karma-typescript'],
+        reporters: ['dots',  'live-html'],
 
         // web server port
         port: 9876,
@@ -61,14 +72,20 @@ module.exports = function (config) {
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: ['Chrome'],
-        // browsers: ['Firefox', 'Chrome', 'Safari', 'IE'],
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
-        singleRun: true,
+        singleRun: false,
 
         // Concurrency level
         // how many browser should be started simultaneous
-        concurrency: Infinity
+        concurrency: Infinity,
+
+        htmlLiveReporter: {
+            colorScheme: 'jasmine', // light 'jasmine' or dark 'earthborn' scheme
+            defaultTab: 'summary', // 'summary' or 'failures': a tab to start with
+            // only show one suite and fail log at a time, with keyboard navigation
+            focusMode: true,
+        }
     })
 };

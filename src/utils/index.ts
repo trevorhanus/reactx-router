@@ -14,4 +14,8 @@ export function isNullOrUndefined(val: any | any[]) {
     }
 }
 
-export function identity() {}
+export function identity(): boolean { return true; }
+
+export function warn(message: string): void {
+    console.warn(`[reactx] Warning: ${message}`);
+}

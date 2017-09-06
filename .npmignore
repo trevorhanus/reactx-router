@@ -1,6 +1,10 @@
 src/
 node_modules/
 docs/
+.idea/
+test/
 
 test.ts
 tsconfig.json
+karma.conf.js
+npm-debug.log

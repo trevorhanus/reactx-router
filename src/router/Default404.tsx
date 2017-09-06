@@ -16,7 +16,7 @@ export {
 export function getDefault404Route() {
     return new Route({
         name: '404',
-        route: '',
+        route: '/notfound',
         component: Default404View
     });
 }

@@ -40,38 +40,64 @@ export class Router implements IRouter {
     @action
     goTo(name: string, params?: IParams) {
         const currentRoute = this._currentRoute;
-        const currentViewState = currentRoute.viewState;
+        const currentViewState = currentRoute ? currentRoute.viewState : null;
 
         const beforeExit = currentRoute && currentRoute.beforeExit || identity;
-        const onExit = currentRoute && currentRoute.onExit || identity;
+        const beforeExitResult = beforeExit(currentViewState);
+        if (beforeExitResult === false) {
+            return;
+        }
 
-        const newRoute = this._routes.get(name);
+        const onExit = currentRoute && currentRoute.onExit || identity;
+        const onExitResult = onExit(currentViewState);
+        if (onExitResult === false) {
+            return;
+        }
+
+        let newRoute = this._routes.get(name) || this._routes.get('404');
         newRoute.applyParams(params);
         const newViewState = newRoute.viewState;
 
         const beforeEnter = newRoute.beforeEnter || identity;
+        const beforeEnterResult = beforeEnter(newViewState);
+        if (beforeEnterResult === false) {
+            return;
+        }
         const onEnter = newRoute.onEnter || identity;
+        const onEnterResult = onEnter(newViewState);
+        if (onEnterResult === false) {
+            return;
+        }
 
-        handleLifeCycleCallback(beforeExit, currentViewState)
-            .then(() => {
-                return handleLifeCycleCallback(onExit, currentViewState);
-            })
-            .then(() => {
-                return handleLifeCycleCallback(beforeEnter, newViewState);
-            })
-            .then(() => {
-                return handleLifeCycleCallback(onEnter, newViewState);
-            })
-            .then(() => {
-                this._currentRoute = newRoute;
-            })
-            .catch(err => {
-                if (err.message === 'break_goto') {
-                    return;
-                } else {
-                    throw err;
-                }
-            });
+        this._currentRoute = newRoute;
+
+
+
+        // console.log('calling beforeexit');
+        // handleLifeCycleCallback(beforeExit, currentViewState)
+        //     .then(() => {
+        //         console.log('calling onexit');
+        //         return handleLifeCycleCallback(onExit, currentViewState);
+        //     })
+        //     .then(() => {
+        //         console.log('calling before enter');
+        //         return handleLifeCycleCallback(beforeEnter, newViewState);
+        //     })
+        //     .then(() => {
+        //         console.log('calling on enter');
+        //         return handleLifeCycleCallback(onEnter, newViewState);
+        //     })
+        //     .then(() => {
+        //         console.log('setting route');
+        //         this._currentRoute = newRoute;
+        //     })
+        //     .catch(err => {
+        //         if (err.message === 'break_goto') {
+        //             return;
+        //         } else {
+        //             throw err;
+        //         }
+        //     });
     }
 
     @action
