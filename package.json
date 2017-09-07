@@ -1,8 +1,9 @@
 {
     "name": "@trevorhanus/reactx",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "A collection of reactive React Components and MobX stores for building super responsive user interfaces",
     "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "mocha": "mocha --reporter spec --watch --compilers ts:ts-node/register ./test/**/*.test.ts --recursive",
         "test": "open http://localhost:5060 && karma start"

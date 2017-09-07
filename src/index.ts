@@ -6,6 +6,7 @@ import {MessagesStore} from './messages/MessagesStore';
 import {Message} from './messages/Message';
 
 import {Dispatcher} from './actions/Dispatcher';
+import {Actions, dispatch, dispatcher} from './actions/Actions';
 import {AbstractAction as Action} from './actions/AbstractAction';
 import {AbstractReversibleAction as ReversibleAction} from './actions/AbstractReversibleAction';
 
@@ -19,6 +20,9 @@ export {
     MessagesStore,
     Message,
 
+    Actions,
+    dispatcher,
+    dispatch,
     Dispatcher,
     Action,
     ReversibleAction
