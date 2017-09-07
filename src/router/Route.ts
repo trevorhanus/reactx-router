@@ -72,6 +72,22 @@ export class Route {
         };
         this._params = newParams;
     }
+
+    replaceUrlParams(params: IParams): string {
+        let route = this.route;
+        const urlParams = params.url;
+        const urlParamTokens = route.match(/:[\w]+/g) || [];
+        urlParamTokens.forEach(token => {
+            const name = token.replace(':', '');
+            const val = urlParams[name];
+            route = route.replace(token, val);
+        });
+        const queryString = Object.keys(params.query).reduce((prev, name) => {
+            return prev += `${name}=${params.query[name]}`;
+        }, '');
+        route += queryString.length > 0 ? queryString : '';
+        return route;
+    }
 }
 
 export interface IViewState {

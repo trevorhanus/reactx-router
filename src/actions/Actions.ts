@@ -1,4 +1,4 @@
-import {Dispatcher} from "../../dist/actions/Dispatcher";
+import {Dispatcher} from "./Dispatcher";
 import {IAction} from "./AbstractAction";
 import {invariant} from "../utils/index";
 
@@ -19,5 +19,3 @@ export class Actions {
 export function dispatch(action: IAction<any, any>) {
     return Actions.dispatch(action);
 }
-
-export const dispatcher = Actions.dispatcher;

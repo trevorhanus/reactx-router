@@ -1,7 +1,7 @@
 import * as queryString from 'query-string';
 import {buildParams, IParams} from "./buildParams";
 import {autorun, observable, computed, action} from 'mobx';
-import {getDefault404Route} from "./Default404";
+import {getDefault404Route} from "./components/Default404";
 import {invariant, identity, isNullOrUndefined} from '../utils';
 import {Route, IViewState} from './Route';
 import {Router as Director} from 'director/build/director';
@@ -42,6 +42,10 @@ export class Router implements IRouter {
         return this._currentRoute !== null ? this._currentRoute.viewState : null;
     }
 
+    get(name: string): Route {
+        return this._routes.get(name);
+    }
+
     @action
     goTo(name: string, params?: IParams) {
         const currentRoute = this._currentRoute;
@@ -75,34 +79,6 @@ export class Router implements IRouter {
         }
 
         this._currentRoute = newRoute;
-
-
-
-        // console.log('calling beforeexit');
-        // handleLifeCycleCallback(beforeExit, currentViewState)
-        //     .then(() => {
-        //         console.log('calling onexit');
-        //         return handleLifeCycleCallback(onExit, currentViewState);
-        //     })
-        //     .then(() => {
-        //         console.log('calling before enter');
-        //         return handleLifeCycleCallback(beforeEnter, newViewState);
-        //     })
-        //     .then(() => {
-        //         console.log('calling on enter');
-        //         return handleLifeCycleCallback(onEnter, newViewState);
-        //     })
-        //     .then(() => {
-        //         console.log('setting route');
-        //         this._currentRoute = newRoute;
-        //     })
-        //     .catch(err => {
-        //         if (err.message === 'break_goto') {
-        //             return;
-        //         } else {
-        //             throw err;
-        //         }
-        //     });
     }
 
     @action

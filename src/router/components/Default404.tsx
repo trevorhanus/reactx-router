@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Route} from "./Route";
+import {Route} from "../Route";
 
 const Default404View = () => {
     return (
