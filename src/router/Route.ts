@@ -54,15 +54,7 @@ export class Route {
 
     @computed
     get path(): string {
-        let route = this.route;
-        const urlParams = this.params.url;
-        const urlParamTokens = route.match(/:[\w]+/g) || [];
-        urlParamTokens.forEach(token => {
-            const name = token.replace(':', '');
-            const val = urlParams[name];
-            route = route.replace(token, val);
-        });
-        return route;
+        return this.buildPath(this.params.url);
     }
 
     applyParams(params: IParams): void {
@@ -73,20 +65,34 @@ export class Route {
         this._params = newParams;
     }
 
-    replaceUrlParams(params: IParams): string {
-        let route = this.route;
-        const urlParams = params.url;
-        const urlParamTokens = route.match(/:[\w]+/g) || [];
+    buildUrl(params: IParams): string {
+        params = params || {};
+        const path = this.buildPath(params.url);
+        const query = this.urlEncodeQueryParams(params.query);
+        return `${path}?${query}`;
+    }
+
+    private buildPath(urlParams?: any): string {
+        let path = this.route;
+        const urlParamTokens = path.match(/:[\w]+/g) || [];
+        if (urlParamTokens.length === 0) return path;
+
         urlParamTokens.forEach(token => {
             const name = token.replace(':', '');
             const val = urlParams[name];
-            route = route.replace(token, val);
+            invariant(isNullOrUndefined(val), `url params are required to build path for route ${path}`);
+            path = path.replace(token, val);
         });
-        const queryString = Object.keys(params.query).reduce((prev, name) => {
-            return prev += `${name}=${params.query[name]}`;
-        }, '');
-        route += queryString.length > 0 ? queryString : '';
-        return route;
+        return path;
+    }
+
+    private urlEncodeQueryParams(queryParams?: any): string {
+        if (isNullOrUndefined(queryParams)) return '';
+        const queryPairs = Object.keys(queryParams).map(name => {
+            const val = queryParams[name];
+            return `${name}=${val}`;
+        });
+        return encodeURIComponent(queryPairs.join('&'));
     }
 }
 

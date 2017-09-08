@@ -25,7 +25,7 @@ const Link = (props: ILinkProps) => {
             router.goTo(name, params);
         }
     });
-    const url = router.get(name).replaceUrlParams(params);
+    const url = router.get(name).buildUrl(params);
 
     return (
         <a

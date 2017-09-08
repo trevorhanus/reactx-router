@@ -126,7 +126,7 @@ export class Router implements IRouter {
     private _setupCurrentPathObserver(): void {
         autorun(() => {
             const path = this.currentPath;
-            if (path !== window.location.pathname) {
+            if (path !== null && path !== window.location.pathname) {
                 window.history.pushState(null, null, path);
             }
         });
