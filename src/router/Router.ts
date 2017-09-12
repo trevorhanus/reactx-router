@@ -10,6 +10,7 @@ export interface IRouter {
     currentPath: string;
     currentViewState: IViewState;
     goTo: (name: string, params?: IPathParams, query?: IQueryParams) => void;
+    hasRoute: (name: string) => boolean;
 }
 
 export class Router implements IRouter {
@@ -77,6 +78,10 @@ export class Router implements IRouter {
         this._currentRoute = newRoute;
     }
 
+    hasRoute(name: string): boolean {
+        return this._routes.has(name);
+    }
+
     @action
     public start(routes: Route[]): void {
         invariant(isNullOrUndefined(routes), 'start requires at least one route');
@@ -100,6 +105,11 @@ export class Router implements IRouter {
         this.goTo(viewName, params, queryParamsObject);
     }
 
+    @action
+    private _handleNotFound() {
+
+    }
+
     private _startRouter() {
         const routes = {};
         this._routes.forEach(route => {
@@ -108,7 +118,7 @@ export class Router implements IRouter {
 
         const director = new Director(routes);
         director.configure({
-            notfound: this._handleDirectorCallback.bind(this, '404'),
+            notfound: this._handleNotFound.bind(this),
             html5history: true
         });
         director.init();

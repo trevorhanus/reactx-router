@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {router} from '../Router';
 import {IPathParams, IQueryParams} from "../IParams";
+import {invariant, isNullOrUndefined} from "../../utils/utils";
 
 export interface ILinkProps {
     children?: any;
@@ -10,11 +11,10 @@ export interface ILinkProps {
     queryParams?: IQueryParams;
     refresh?: boolean;
     style?: any;
-    title: string;
 }
 
 const Link = (props: ILinkProps) => {
-    const {className, name, params, queryParams, refresh, style, title} = props;
+    const {className, name, params, queryParams, refresh, style} = props;
     const handleClick = (e => {
         const middleClick = e.which === 2;
         const cmdOrCtrl = (e.metaKey || e.ctrlKey);
@@ -26,16 +26,23 @@ const Link = (props: ILinkProps) => {
             router.goTo(name, params, queryParams);
         }
     });
+
+    invariant(!router.hasRoute(name), `Can't find route with name ${name} in Link Component.`);
+
     const url = router.get(name).pathAndQuery;
 
     return (
         <a
-            className={className || ''}
+            className={className || null}
             style={style || {}}
-        >
-            {React.cloneElement(React.Children.only(props.children))}
             onClick={handleClick}
             href={url}
+        >
+            {
+                !isNullOrUndefined(props.children)
+                ? props.children
+                : null
+            }
         </a>
     )
 };
