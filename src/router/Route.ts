@@ -10,9 +10,9 @@ export interface IRouteConfig {
     component: React.ComponentType<any>;
     name: string;
     path: string;
-    beforeEnter?: (state: IViewState) => boolean | void;
-    onEnter?: (state: IViewState) => void;
-    beforeExit?: (state: IViewState) => boolean | void;
+    beforeEnter?: (state: IViewState, store?: any) => boolean | void;
+    onEnter?: (state: IViewState, store?: any) => void;
+    beforeExit?: (state: IViewState, store?: any) => boolean | void;
 }
 
 export interface IRoute {
@@ -29,9 +29,9 @@ export interface IRoute {
     pathDefinition: string; // path with path param names as placeholders, does not include parent routes
     queryParams: IQueryParams;
     viewState: IViewState;
-    beforeEnter: (state: IViewState) => boolean | void;
-    beforeExit: (state: IViewState) => boolean | void;
-    onEnter: (state: IViewState) => boolean | void;
+    beforeEnter: (state: IViewState, store?: any) => boolean | void;
+    beforeExit: (state: IViewState, store?: any) => boolean | void;
+    onEnter: (state: IViewState, store?: any) => boolean | void;
 }
 
 export class Route implements IRoute {
@@ -41,9 +41,9 @@ export class Route implements IRoute {
     name: string;
     parentRoute: Route;
     pathDefinition: string;
-    beforeEnter: (state: IViewState) => boolean | void;
-    onEnter: (state: IViewState) => void;
-    beforeExit: (state: IViewState) => boolean | void;
+    beforeEnter: (state: IViewState, store?: any) => boolean | void;
+    onEnter: (state: IViewState, store?: any) => void;
+    beforeExit: (state: IViewState, store?: any) => boolean | void;
     @observable private _params: IPathParams;
     @observable private _queryParams: IQueryParams;
 

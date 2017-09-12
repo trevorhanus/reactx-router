@@ -177,5 +177,32 @@ describe('Router', () => {
             expect(router.currentPath).to.equal('/login');
             expect(window.location.pathname).to.equal('/login');
         });
+
+        it('passes Store to callbacks', () => {
+            const store = {loggedIn: false};
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/home',
+                component: TestComponent,
+                beforeEnter: (state, store) => {
+                    if (!store.loggedIn) {
+                        router.goTo('login');
+                        return false;
+                    }
+                }
+            });
+            const login: any = new Route({
+                name: 'login',
+                path: '/login',
+                component: TestComponent
+            });
+            window.history.pushState(null, null, '/home');
+            router.start([home, login], store);
+            expect(router.currentPath).to.equal('/login');
+            store.loggedIn = true;
+            router.goTo('home');
+            expect(window.location.pathname).to.equal('/home');
+        });
     });
 });

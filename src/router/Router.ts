@@ -15,6 +15,7 @@ export interface IRouter {
 
 export class Router implements IRouter {
     private _routes: Map<string, Route>;
+    private _store: any;
     @observable.ref private _currentRoute: Route;
 
     constructor() {
@@ -52,7 +53,7 @@ export class Router implements IRouter {
         const currentViewState = currentRoute ? currentRoute.viewState : null;
 
         const beforeExit = currentRoute && currentRoute.beforeExit || identity;
-        const beforeExitResult = beforeExit(currentViewState);
+        const beforeExitResult = beforeExit(currentViewState, this._store);
         if (beforeExitResult === false) {
             return;
         }
@@ -67,13 +68,13 @@ export class Router implements IRouter {
         const newViewState = newRoute.viewState;
 
         const beforeEnter = newRoute.beforeEnter;
-        const beforeEnterResult = beforeEnter(newViewState);
+        const beforeEnterResult = beforeEnter(newViewState, this._store);
         if (beforeEnterResult === false) {
             return;
         }
 
         const onEnter = newRoute.onEnter || identity;
-        onEnter(newViewState);
+        onEnter(newViewState, this._store);
 
         this._currentRoute = newRoute;
     }
@@ -83,7 +84,8 @@ export class Router implements IRouter {
     }
 
     @action
-    public start(routes: Route[]): void {
+    public start(routes: Route[], store?: any): void {
+        this._store = store || null;
         invariant(isNullOrUndefined(routes), 'start requires at least one route');
         
         // need to traverse the entire tree and ensure pathDefintions and names are unique
