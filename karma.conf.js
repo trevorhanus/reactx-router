@@ -10,12 +10,6 @@ module.exports = function (config) {
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
         frameworks: ['mocha', 'chai'],
 
-        // plugins: [
-        //     require('karma-mocha'),
-        //     require('karma-webpack'),
-        //     require('karma-chai')
-        // ],
-
         mime: {
             'text/x-typescript': ['ts','tsx']
         },
@@ -23,7 +17,8 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'test/**/*.test.ts'
+            'test/**/*.test.ts',
+            'test/**/*.test.tsx'
         ],
 
         exclude: [

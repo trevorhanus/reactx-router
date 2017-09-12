@@ -1,6 +1,6 @@
 {
     "name": "@trevorhanus/reactx",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "description": "A collection of reactive React Components and MobX stores for building super responsive user interfaces",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "@trevorhanus/timer": "^0.1.0",
+        "@types/react": "^16.0.5",
         "@types/uuid": "^3.4.0",
         "director": "^1.2.8",
         "lodash": "^4.17.4",
@@ -30,6 +31,7 @@
         "@types/sinon": "^2.3.3",
         "awesome-typescript-loader": "^3.2.3",
         "chai": "^4.1.2",
+        "enzyme": "^2.9.1",
         "karma": "^1.7.1",
         "karma-chai": "^0.1.0",
         "karma-chrome-launcher": "^2.2.0",
@@ -39,6 +41,8 @@
         "karma-webpack": "^2.0.4",
         "mobx": "^3.2.2",
         "mocha": "^3.5.0",
+        "react-dom": "^15.6.1",
+        "react-test-renderer": "^15.6.1",
         "sinon": "^3.2.1",
         "ts-node": "^3.3.0",
         "webpack": "^3.5.5"

@@ -1,6 +1,6 @@
 import {router} from './router/Router';
 import {Route, IRouteConfig, IViewState} from './router/Route';
-import {MobxRouter as Router} from './router/components/RouterComponent';
+import {Router} from './router/components/RouterComponent';
 import {Link} from './router/components/Link';
 
 import {MessagesStore} from './messages/MessagesStore';

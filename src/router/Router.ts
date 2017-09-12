@@ -1,16 +1,15 @@
 import * as queryString from 'query-string';
-import {buildParams, IParams} from "./buildParams";
 import {autorun, observable, computed, action} from 'mobx';
-import {getDefault404Route} from "./components/Default404";
-import {invariant, identity, isNullOrUndefined} from '../utils';
+import {invariant, identity, isNullOrUndefined, buildPathParamsObject} from '../utils/utils';
+import {IPathParams, IQueryParams} from './IParams';
 import {Route, IViewState} from './Route';
 import {Router as Director} from 'director/build/director';
 
 export interface IRouter {
-    currentParams: IParams;
+    currentParams: IPathParams;
     currentPath: string;
     currentViewState: IViewState;
-    goTo: (name: string, params: IParams) => void;
+    goTo: (name: string, params?: IPathParams, query?: IQueryParams) => void;
 }
 
 export class Router implements IRouter {
@@ -23,13 +22,13 @@ export class Router implements IRouter {
     }
 
     @computed
-    get currentParams(): IParams {
+    get currentParams(): IPathParams {
         return this._currentRoute !== null ? this._currentRoute.params : null;
     }
 
     @computed
     get currentPath(): string {
-        return this._currentRoute !== null ? this._currentRoute.path : null;
+        return this._currentRoute !== null ? this._currentRoute.fullPath : null;
     }
 
     @computed
@@ -47,7 +46,7 @@ export class Router implements IRouter {
     }
 
     @action
-    goTo(name: string, params?: IParams) {
+    goTo(name: string, params?: IPathParams, query?: IQueryParams) {
         const currentRoute = this._currentRoute;
         const currentViewState = currentRoute ? currentRoute.viewState : null;
 
@@ -57,26 +56,23 @@ export class Router implements IRouter {
             return;
         }
 
-        const onExit = currentRoute && currentRoute.onExit || identity;
-        const onExitResult = onExit(currentViewState);
-        if (onExitResult === false) {
-            return;
+        let newRoute = this._routes.get(name);
+        if (isNullOrUndefined(newRoute)) {
+            // need to display the 404 component
+            // for now we will just throw
+            throw new Error('could not find route');
         }
-
-        let newRoute = this._routes.get(name) || this._routes.get('404');
-        newRoute.applyParams(params);
+        newRoute.updateParams(params, query);
         const newViewState = newRoute.viewState;
 
-        const beforeEnter = newRoute.beforeEnter || identity;
+        const beforeEnter = newRoute.beforeEnter;
         const beforeEnterResult = beforeEnter(newViewState);
         if (beforeEnterResult === false) {
             return;
         }
+
         const onEnter = newRoute.onEnter || identity;
-        const onEnterResult = onEnter(newViewState);
-        if (onEnterResult === false) {
-            return;
-        }
+        onEnter(newViewState);
 
         this._currentRoute = newRoute;
     }
@@ -84,40 +80,35 @@ export class Router implements IRouter {
     @action
     public start(routes: Route[]): void {
         invariant(isNullOrUndefined(routes), 'start requires at least one route');
-
-        routes.forEach(route => {
+        
+        // need to traverse the entire tree and ensure pathDefintions and names are unique
+        const pathDefinitions: {[pathDefinition: string]: string} = {};
+        this._traverseRouteTree(routes, (route) => {
             invariant(this._routes.has(route.name), `Two or more routes are named ${route.name}`);
+            invariant(!isNullOrUndefined(pathDefinitions[route.fullPathDefinition]), `Two or more routes have the same path: ${pathDefinitions[route.fullPathDefinition]} and ${route.name}`);
             this._routes.set(route.name, route);
         });
 
-        if (!this._routes.has('404')) {
-            this._routes.set('404', getDefault404Route());
-        }
         this._setupCurrentPathObserver();
         this._startRouter();
     }
 
     @action
-    private _handleBrowserUrlChange(viewName: string, ...urlParamsArray: string[]): void {
-        const route = this._routes.get(viewName);
-        invariant(!route, 'could not find view with name ${viewName}');
-
+    private _handleDirectorCallback(viewName: string, fullPathDefinition: string, ...urlParamsArray: string[]): void {
+        const params = buildPathParamsObject(fullPathDefinition, urlParamsArray);
         const queryParamsObject = queryString.parse(window.location.search);
-        const params = buildParams(route.route, route.acceptedQueryParams, urlParamsArray, queryParamsObject);
-        this.goTo(viewName, params);
+        this.goTo(viewName, params, queryParamsObject);
     }
 
     private _startRouter() {
         const routes = {};
-        this._routes.forEach(view => {
-            if (view.name !== '404') {
-                routes[view.path] = this._handleBrowserUrlChange.bind(this, view.name);
-            }
+        this._routes.forEach(route => {
+            routes[route.fullPathDefinition] = this._handleDirectorCallback.bind(this, route.name, route.fullPathDefinition);
         });
 
         const director = new Director(routes);
         director.configure({
-            notfound: this._handleBrowserUrlChange.bind(this, '404'),
+            notfound: this._handleDirectorCallback.bind(this, '404'),
             html5history: true
         });
         director.init();
@@ -125,9 +116,18 @@ export class Router implements IRouter {
 
     private _setupCurrentPathObserver(): void {
         autorun(() => {
-            const path = this.currentPath;
-            if (path !== null && path !== window.location.pathname) {
-                window.history.pushState(null, null, path);
+            const pathAndQuery = this.currentRoute.pathAndQuery;
+            if (pathAndQuery !== null && pathAndQuery !== window.location.pathname + window.location.search) {
+                window.history.pushState(null, null, pathAndQuery);
+            }
+        });
+    }
+
+    private _traverseRouteTree(routes: Route[], iterator: (route: Route) => void): void {
+        routes.forEach(route => {
+            iterator(route);
+            if (!isNullOrUndefined(route.children)) {
+                this._traverseRouteTree(route.children, iterator);
             }
         });
     }
