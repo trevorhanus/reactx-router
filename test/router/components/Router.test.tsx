@@ -90,4 +90,35 @@ describe('Router Component', () => {
         expect(wrapper.contains(<div>nested</div>)).to.be.true;
         expect(wrapper.contains(<div>nestednested</div>)).to.be.false;
     });
+
+    it('renders default 404 component when path is not found', () => {
+        const router = new Router();
+        const home: any = new Route({
+            name: 'home',
+            path: '/home',
+            component: Index
+        });
+        window.history.pushState(null, null, '/derp');
+        router.start([home]);
+        const wrapper = mount(<RouterComponent router={router} />);
+        expect(wrapper.contains(<div><h1>404: Not Found</h1></div>)).to.be.true;
+    });
+
+    it('renders given 404 component when path is not found', () => {
+        const NotFound = () => {
+            return (
+                <div>error</div>
+            )
+        };
+        const router = new Router();
+        const home: any = new Route({
+            name: 'home',
+            path: '/home',
+            component: Index
+        });
+        window.history.pushState(null, null, '/derp');
+        router.start([home], null, NotFound);
+        const wrapper = mount(<RouterComponent router={router} />);
+        expect(wrapper.contains(<div>error</div>)).to.be.true;
+    });
 });

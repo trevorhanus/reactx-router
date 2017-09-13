@@ -4,15 +4,18 @@ import {invariant, isNullOrUndefined, identity} from "../utils/utils";
 import {IPathParams, IQueryParams} from './IParams';
 import {replacePathParams, urlEncodeQueryParams} from '../utils/utils';
 
+export type ILifecycleCallback = (state: IViewState, store?: any) => boolean | void;
+export type INonblockingLifecycleCallback = (state: IViewState, store?: any) => void;
+
 export interface IRouteConfig {
     acceptedQueryParams?: string[];
     children?: Route[];
     component: React.ComponentType<any>;
     name: string;
     path: string;
-    beforeEnter?: (state: IViewState, store?: any) => boolean | void;
-    onEnter?: (state: IViewState, store?: any) => void;
-    beforeExit?: (state: IViewState, store?: any) => boolean | void;
+    beforeEnter?: ILifecycleCallback;
+    onEnter?: INonblockingLifecycleCallback;
+    beforeExit?: ILifecycleCallback;
 }
 
 export interface IRoute {
@@ -21,6 +24,7 @@ export interface IRoute {
     component: React.ComponentType<any>;
     fullPath: string; // path with path params replaced, includes any parent paths
     fullPathDefinition: string; // path with path param names as placeholders, includes all parent routes
+    getLifecycleCallbackList: (lifecycleName: string) => ILifecycleCallback[]; // a list of callbacks with the top-most route's callback at index 0
     name: string; // unique name
     params: IPathParams;
     parentRoute: Route;
@@ -101,6 +105,16 @@ export class Route implements IRoute {
             query: this.queryParams,
             view: this
         }
+    }
+
+    getLifecycleCallbackList(lifecycleName: string): ILifecycleCallback[] {
+        const callbacks = [];
+        let route: IRoute = this;
+        while (route !== null) {
+            callbacks.unshift(route[lifecycleName]);
+            route = route.parentRoute;
+        }
+        return callbacks;
     }
 
     @action

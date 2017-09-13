@@ -1,8 +1,9 @@
 import * as queryString from 'query-string';
 import {autorun, observable, computed, action} from 'mobx';
-import {invariant, identity, isNullOrUndefined, buildPathParamsObject} from '../utils/utils';
+import {Default404View} from './components/Default404';
+import {invariant, isNullOrUndefined, buildPathParamsObject} from '../utils/utils';
 import {IPathParams, IQueryParams} from './IParams';
-import {Route, IViewState} from './Route';
+import {Route, IRoute, IViewState, ILifecycleCallback} from './Route';
 import {Router as Director} from 'director/build/director';
 
 export interface IRouter {
@@ -14,11 +15,13 @@ export interface IRouter {
 }
 
 export class Router implements IRouter {
+    private _notFoundComponent: React.ComponentType<any>;
     private _routes: Map<string, Route>;
     private _store: any;
-    @observable.ref private _currentRoute: Route;
+    @observable.ref private _currentRoute: IRoute;
 
     constructor() {
+        this._notFoundComponent = Default404View;
         this._routes = new Map<string, Route>();
         this._currentRoute = null;
     }
@@ -34,7 +37,7 @@ export class Router implements IRouter {
     }
 
     @computed
-    get currentRoute(): Route {
+    get currentRoute(): IRoute {
         return this._currentRoute;
     }
 
@@ -52,31 +55,40 @@ export class Router implements IRouter {
         const currentRoute = this._currentRoute;
         const currentViewState = currentRoute ? currentRoute.viewState : null;
 
-        const beforeExit = currentRoute && currentRoute.beforeExit || identity;
-        const beforeExitResult = beforeExit(currentViewState, this._store);
+        const beforeExitResult = !isNullOrUndefined(currentRoute)
+            ? currentRoute.getLifecycleCallbackList('beforeExit').every(cb => {
+                const result = cb(currentViewState, this._store);
+                return result !== false;
+            })
+            : true;
         if (beforeExitResult === false) {
             return;
         }
 
         let newRoute = this._routes.get(name);
-        if (isNullOrUndefined(newRoute)) {
-            // need to display the 404 component
-            // for now we will just throw
-            throw new Error('could not find route');
-        }
+
+        // not finding the route is an invariant, since the developer would
+        // have called goTo('name') and failed to have set up the route with that name
+        // we do not display the 404 page here because the error came from the code base
+        // and not the user going to a url that isn't supported
+        invariant(isNullOrUndefined(newRoute), `no route with name ${name} was configured, but router.goTo() was invoked with that name.`);
+
         newRoute.updateParams(params, query);
         const newViewState = newRoute.viewState;
 
-        const beforeEnter = newRoute.beforeEnter;
-        const beforeEnterResult = beforeEnter(newViewState, this._store);
+        const beforeEnterResult = newRoute.getLifecycleCallbackList('beforeEnter').every(cb => {
+            const result = cb(newViewState, this._store);
+            return !(result === false);
+        });
         if (beforeEnterResult === false) {
             return;
         }
 
-        const onEnter = newRoute.onEnter || identity;
-        onEnter(newViewState, this._store);
-
         this._currentRoute = newRoute;
+
+        newRoute.getLifecycleCallbackList('onEnter').forEach(cb => {
+            cb(newViewState, this._store);
+        });
     }
 
     hasRoute(name: string): boolean {
@@ -84,38 +96,58 @@ export class Router implements IRouter {
     }
 
     @action
-    public start(routes: Route[], store?: any): void {
+    public start(routes: Route[], store?: any, notFoundComponent?: React.ComponentType<any>): void {
+        if (!isNullOrUndefined(notFoundComponent)) {
+            this._notFoundComponent = notFoundComponent;
+        }
         this._store = store || null;
         invariant(isNullOrUndefined(routes), 'start requires at least one route');
-        
+
         // need to traverse the entire tree and ensure pathDefintions and names are unique
-        const pathDefinitions: {[pathDefinition: string]: string} = {};
-        this._traverseRouteTree(routes, (route) => {
+        const pathDefinitions: { [pathDefinition: string]: string } = {};
+        this._traverseRouteTreeBreadthFirst(routes, (route) => {
             invariant(this._routes.has(route.name), `Two or more routes are named ${route.name}`);
             invariant(!isNullOrUndefined(pathDefinitions[route.fullPathDefinition]), `Two or more routes have the same path: ${pathDefinitions[route.fullPathDefinition]} and ${route.name}`);
             this._routes.set(route.name, route);
         });
 
         this._setupCurrentPathObserver();
-        this._startRouter();
+        this._initializeDirector();
     }
 
     @action
-    private _handleDirectorCallback(viewName: string, fullPathDefinition: string, ...urlParamsArray: string[]): void {
-        const params = buildPathParamsObject(fullPathDefinition, urlParamsArray);
+    private _handleDirectorCallback(route: Route, ...urlParamsArray: string[]): void {
+        const params = buildPathParamsObject(route.fullPathDefinition, urlParamsArray);
         const queryParamsObject = queryString.parse(window.location.search);
-        this.goTo(viewName, params, queryParamsObject);
+        this.goTo(route.name, params, queryParamsObject);
     }
 
     @action
     private _handleNotFound() {
-
+        // this is invoked when the director instance
+        // doesn't have a configured callback for the brower's
+        // current location
+        this._currentRoute = {
+            component: this._notFoundComponent,
+            name: 'notfound',
+        } as IRoute;
     }
 
-    private _startRouter() {
+    // initializes a Director instance to route
+    // the browser's current location to the goTo method
+    private _initializeDirector() {
         const routes = {};
         this._routes.forEach(route => {
-            routes[route.fullPathDefinition] = this._handleDirectorCallback.bind(this, route.name, route.fullPathDefinition);
+            const path = route.fullPathDefinition;
+            if (!isNullOrUndefined(routes[path])) {
+                // path already exists in map
+                // make sure that this route is nested under
+                // the existing route, otherwise throw
+                const existingRouteInMap = routes[path];
+                const routeIsNested = route.parentRoute.name === existingRouteInMap.name;
+                invariant(routeIsNested, `2 or more routes have the same path. ${existingRouteInMap.name} and ${route.name}`);
+            }
+            routes[route.fullPathDefinition] = this._handleDirectorCallback.bind(this, route);
         });
 
         const director = new Director(routes);
@@ -128,6 +160,7 @@ export class Router implements IRouter {
 
     private _setupCurrentPathObserver(): void {
         autorun(() => {
+            if (isNullOrUndefined(this.currentRoute)) return;
             const pathAndQuery = this.currentRoute.pathAndQuery;
             if (pathAndQuery !== null && pathAndQuery !== window.location.pathname + window.location.search) {
                 window.history.pushState(null, null, pathAndQuery);
@@ -135,11 +168,11 @@ export class Router implements IRouter {
         });
     }
 
-    private _traverseRouteTree(routes: Route[], iterator: (route: Route) => void): void {
+    private _traverseRouteTreeBreadthFirst(routes: Route[], iterator: (route: Route) => void): void {
         routes.forEach(route => {
             iterator(route);
             if (!isNullOrUndefined(route.children)) {
-                this._traverseRouteTree(route.children, iterator);
+                this._traverseRouteTreeBreadthFirst(route.children, iterator);
             }
         });
     }
@@ -150,15 +183,4 @@ const router = new Router();
 
 export {
     router
-}
-
-function handleLifeCycleCallback(callback: (viewState: IViewState) => any, viewState: IViewState): Promise<boolean> {
-    const result = callback(viewState);
-    if (result || result === null || result === undefined) {
-        return Promise.resolve(true);
-    }
-    if (result instanceof Promise) {
-        return result;
-    }
-    throw new Error('break_goto');
 }
