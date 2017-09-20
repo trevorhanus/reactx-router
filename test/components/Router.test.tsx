@@ -1,10 +1,10 @@
+import { expect } from 'chai';
+import { mount } from 'enzyme';
+import { observer } from 'mobx-react';
 import * as React from 'react';
-import {observer} from 'mobx-react';
-import {expect} from 'chai';
-import {mount} from 'enzyme';
-import {Router as RouterComponent} from '../../../src/router/components/RouterComponent';
-import {Route} from '../../../src/router/Route';
-import {Router} from '../../../src/router/Router';
+import {Router as RouterComponent } from '../../src/components/RouterComponent';
+import { Route } from '../../src/Route';
+import { Router } from '../../src/Router';
 
 interface IIndexProps {
     routerOutlet?: any;
@@ -16,7 +16,7 @@ const Index = observer((props: any) => {
             <div>index</div>
             {props.routerOutlet}
         </div>
-    )
+    );
 });
 
 const Nested = (props: IIndexProps) => {
@@ -25,13 +25,13 @@ const Nested = (props: IIndexProps) => {
             <div>nested</div>
             {props.routerOutlet}
         </div>
-    )
+    );
 };
 
 const NestedNested = (props: any) => {
     return (
         <div>nestednested</div>
-    )
+    );
 };
 
 describe('Router Component', () => {
@@ -46,9 +46,9 @@ describe('Router Component', () => {
                 new Route({
                     name: 'nested',
                     path: '/:userId',
-                    component: Nested
-                })
-            ]
+                    component: Nested,
+                }),
+            ],
         });
         window.history.pushState(null, null, '/home');
         router.start([home]);
@@ -73,10 +73,10 @@ describe('Router Component', () => {
                             name: 'nestednested',
                             path: '/:nestedNestedId',
                             component: NestedNested,
-                        })
-                    ]
-                })
-            ]
+                        }),
+                    ],
+                }),
+            ],
         });
         window.history.pushState(null, null, '/1234/5678');
         router.start([index]);
@@ -96,7 +96,7 @@ describe('Router Component', () => {
         const home: any = new Route({
             name: 'home',
             path: '/home',
-            component: Index
+            component: Index,
         });
         window.history.pushState(null, null, '/derp');
         router.start([home]);
@@ -108,13 +108,13 @@ describe('Router Component', () => {
         const NotFound = () => {
             return (
                 <div>error</div>
-            )
+            );
         };
         const router = new Router();
         const home: any = new Route({
             name: 'home',
             path: '/home',
-            component: Index
+            component: Index,
         });
         window.history.pushState(null, null, '/derp');
         router.start([home], null, NotFound);

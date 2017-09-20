@@ -1,19 +1,14 @@
-import {router} from './router/Router';
-import {Route, IRouteConfig, IViewState} from './router/Route';
-import {Router} from './router/components/RouterComponent';
-import {Link} from './router/components/Link';
-
-import {MessagesStore} from './messages/MessagesStore';
-import {Message} from './messages/Message';
+import { Link } from './components/Link';
+import { Router as ReactxRouter } from './components/RouterComponent';
+import { IRouteConfig, IViewState, Route } from './Route';
+import { router, Router } from './Router';
 
 export {
     Link,
     router,
     Route,
     Router,
+    ReactxRouter,
     IRouteConfig,
     IViewState,
-
-    MessagesStore,
-    Message
-}
+};

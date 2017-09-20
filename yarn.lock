@@ -4707,6 +4707,10 @@ tsconfig@^6.0.0:
     strip-bom "^3.0.0"
     strip-json-comments "^2.0.0"
 
+tslint-config-gravity@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/tslint-config-gravity/-/tslint-config-gravity-1.0.1.tgz#1fb51d66564f22df92826f894c8029c7102e4e4f"
+
 tty-browserify@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/tty-browserify/-/tty-browserify-0.0.0.tgz#a157ba402da24e9bf957f9aa69d524eed42901a6"

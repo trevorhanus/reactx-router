@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {router} from '../Router';
-import {IPathParams, IQueryParams} from "../IParams";
-import {invariant, isNullOrUndefined} from "../../utils/utils";
+import { IPathParams, IQueryParams } from '../IParams';
+import { router } from '../Router';
+import { invariant, isOr } from '../utils/utils';
 
 export interface ILinkProps {
     children?: any;
@@ -13,10 +13,12 @@ export interface ILinkProps {
     style?: any;
 }
 
-const Link = (props: ILinkProps) => {
+const MIDDLE_MOUSE_BUTTON = 2;
+
+export const Link = (props: ILinkProps) => {
     const {className, name, params, queryParams, refresh, style} = props;
     const handleClick = (e => {
-        const middleClick = e.which === 2;
+        const middleClick = e.which === MIDDLE_MOUSE_BUTTON;
         const cmdOrCtrl = (e.metaKey || e.ctrlKey);
         const openinNewTab = middleClick || cmdOrCtrl;
         const shouldNavigateManually = refresh || openinNewTab || cmdOrCtrl;
@@ -33,20 +35,16 @@ const Link = (props: ILinkProps) => {
 
     return (
         <a
-            className={className || null}
-            style={style || {}}
+            className={isOr(className, null)}
+            style={isOr(style, {})}
             onClick={handleClick}
             href={url}
         >
             {
-                !isNullOrUndefined(props.children)
+                props.children != null
                 ? props.children
                 : null
             }
         </a>
-    )
-};
-
-export {
-    Link
+    );
 };

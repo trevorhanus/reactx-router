@@ -1,16 +1,10 @@
+import { expect } from 'chai';
 import * as sinon from 'sinon';
-import {Route} from "../../src/router/Route";
-import {expect} from 'chai';
-import {Router} from '../../src/router/Router';
-import {TestComponent} from "./TestComponent";
+import { Route } from '../src/Route';
+import { Router } from '../src/Router';
+import { TestComponent } from './TestComponent';
 
 describe('Router', () => {
-
-    beforeEach(() => {
-    });
-
-    afterEach(() => {
-    });
 
     describe('constructor', () => {
 
@@ -43,29 +37,28 @@ describe('Router', () => {
             const home: any = new Route({
                 name: 'home',
                 path: '/home',
-                component: TestComponent
+                component: TestComponent,
             });
             window.history.pushState(null, null, '/home');
             router.start([home]);
             expect(router.currentPath).to.equal('/home');
         });
 
-        it('throws when there are multiple non-nested routes have the same path', () => {
+        it('throws when multiple non-nested routes have the same path', () => {
             const index: Route = new Route({
                 name: 'index',
                 path: '/',
-                component: TestComponent
+                component: TestComponent,
             });
             const index2: Route = new Route({
                 name: 'index2',
                 path: '/',
-                component: TestComponent
+                component: TestComponent,
             });
 
             const router = new Router();
-
             expect(() => {
-                router.start([index, index2])
+                router.start([index, index2]);
             }).to.throw();
         });
 
@@ -78,9 +71,9 @@ describe('Router', () => {
                     new Route({
                         name: 'nested',
                         path: '/',
-                        component: TestComponent
-                    })
-                ]
+                        component: TestComponent,
+                    }),
+                ],
             });
 
             const router = new Router();
@@ -97,7 +90,7 @@ describe('Router', () => {
             const home: any = new Route({
                 name: 'home',
                 path: '/home',
-                component: TestComponent
+                component: TestComponent,
             });
             window.history.pushState(null, null, '/derp');
             router.start([home]);
@@ -112,12 +105,12 @@ describe('Router', () => {
             const home: any = new Route({
                 name: 'home',
                 path: '/home',
-                component: TestComponent
+                component: TestComponent,
             });
             const user: any = new Route({
                 name: 'userProfile',
                 path: '/home/:userId',
-                component: TestComponent
+                component: TestComponent,
             });
             window.history.pushState(null, null, '/home');
             router.start([home, user]);
@@ -131,13 +124,13 @@ describe('Router', () => {
             const profile = new Route({
                 name: 'profile',
                 path: '/profiles/:userId',
-                component: TestComponent
+                component: TestComponent,
             });
             const home: any = new Route({
                 name: 'home',
                 path: '/',
                 component: TestComponent,
-                children: [profile]
+                children: [profile],
             });
             const routes = [home];
             window.history.pushState(null, null, '/');
@@ -158,12 +151,12 @@ describe('Router', () => {
                 name: 'home',
                 path: '/home',
                 component: TestComponent,
-                beforeExit: () => false
+                beforeExit: () => false,
             });
             const user: any = new Route({
                 name: 'userProfile',
                 path: '/home/:userId',
-                component: TestComponent
+                component: TestComponent,
             });
             window.history.pushState(null, null, '/home');
             router.start([home, user]);
@@ -177,13 +170,13 @@ describe('Router', () => {
             const home: any = new Route({
                 name: 'home',
                 path: '/home',
-                component: TestComponent
+                component: TestComponent,
             });
             const user: any = new Route({
                 name: 'userProfile',
                 path: '/home/:userId',
                 component: TestComponent,
-                beforeEnter: () => false
+                beforeEnter: () => false,
             });
             window.history.pushState(null, null, '/home');
             router.start([home, user]);
@@ -197,13 +190,13 @@ describe('Router', () => {
             const home: any = new Route({
                 name: 'home',
                 path: '/home',
-                component: TestComponent
+                component: TestComponent,
             });
             const user: any = new Route({
                 name: 'userProfile',
                 path: '/home/:userId',
                 component: TestComponent,
-                beforeEnter: () => false
+                beforeEnter: () => false,
             });
             window.history.pushState(null, null, '/home');
             router.start([home, user]);
@@ -221,12 +214,12 @@ describe('Router', () => {
                 beforeEnter: () => {
                     router.goTo('login');
                     return false;
-                }
+                },
             });
             const login: any = new Route({
                 name: 'login',
                 path: '/login',
-                component: TestComponent
+                component: TestComponent,
             });
             window.history.pushState(null, null, '/home');
             router.start([home, login]);
@@ -246,12 +239,12 @@ describe('Router', () => {
                         router.goTo('login');
                         return false;
                     }
-                }
+                },
             });
             const login: any = new Route({
                 name: 'login',
                 path: '/login',
-                component: TestComponent
+                component: TestComponent,
             });
             window.history.pushState(null, null, '/home');
             router.start([home, login], store);
@@ -289,16 +282,16 @@ describe('Router', () => {
                                 component: TestComponent,
                                 beforeExit: () => {
                                     nestednestedStub();
-                                }
-                            })
-                        ]
-                    })
-                ]
+                                },
+                            }),
+                        ],
+                    }),
+                ],
             });
             const other = new Route({
                 name: 'other',
                 path: '/other',
-                component: TestComponent
+                component: TestComponent,
             });
             const router = new Router();
             router.start([index, other]);
@@ -335,16 +328,16 @@ describe('Router', () => {
                                 component: TestComponent,
                                 beforeExit: () => {
                                     nestednestedStub();
-                                }
-                            })
-                        ]
-                    })
-                ]
+                                },
+                            }),
+                        ],
+                    }),
+                ],
             });
             const other = new Route({
                 name: 'other',
                 path: '/other',
-                component: TestComponent
+                component: TestComponent,
             });
             const router = new Router();
             router.start([index, other]);
@@ -381,16 +374,16 @@ describe('Router', () => {
                                 component: TestComponent,
                                 beforeEnter: () => {
                                     nestednestedStub();
-                                }
-                            })
-                        ]
-                    })
-                ]
+                                },
+                            }),
+                        ],
+                    }),
+                ],
             });
             const other = new Route({
                 name: 'other',
                 path: '/other',
-                component: TestComponent
+                component: TestComponent,
             });
             const router = new Router();
             router.start([index, other]);
@@ -427,16 +420,16 @@ describe('Router', () => {
                                 component: TestComponent,
                                 onEnter: () => {
                                     nestednestedStub();
-                                }
-                            })
-                        ]
-                    })
-                ]
+                                },
+                            }),
+                        ],
+                    }),
+                ],
             });
             const other = new Route({
                 name: 'other',
                 path: '/other',
-                component: TestComponent
+                component: TestComponent,
             });
             const router = new Router();
             router.start([index, other]);
@@ -473,16 +466,16 @@ describe('Router', () => {
                                 component: TestComponent,
                                 onEnter: () => {
                                     nestednestedStub();
-                                }
-                            })
-                        ]
-                    })
-                ]
+                                },
+                            }),
+                        ],
+                    }),
+                ],
             });
             const other = new Route({
                 name: 'other',
                 path: '/other',
-                component: TestComponent
+                component: TestComponent,
             });
             const router = new Router();
             router.start([index, other]);

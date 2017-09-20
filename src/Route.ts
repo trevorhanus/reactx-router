@@ -1,8 +1,13 @@
+import { action, computed, observable } from 'mobx';
 import * as path from 'path';
-import {action, computed, observable} from "mobx";
-import {invariant, isNullOrUndefined, identity} from "../utils/utils";
-import {IPathParams, IQueryParams} from './IParams';
-import {replacePathParams, urlEncodeQueryParams} from '../utils/utils';
+import { IPathParams, IQueryParams } from './IParams';
+import {
+    identity,
+    invariant,
+    isNullOrUndefined,
+    replacePathParams,
+    urlEncodeQueryParams,
+} from './utils/utils';
 
 export type ILifecycleCallback = (state: IViewState, store?: any) => boolean | void;
 export type INonblockingLifecycleCallback = (state: IViewState, store?: any) => void;
@@ -24,7 +29,7 @@ export interface IRoute {
     component: React.ComponentType<any>;
     fullPath: string; // path with path params replaced, includes any parent paths
     fullPathDefinition: string; // path with path param names as placeholders, includes all parent routes
-    getLifecycleCallbackList: (lifecycleName: string) => ILifecycleCallback[]; // a list of callbacks with the top-most route's callback at index 0
+    getLifecycleCallbackList(lifecycleName: string): ILifecycleCallback[]; // a list of callbacks with the top-most route's callback at index 0
     name: string; // unique name
     params: IPathParams;
     parentRoute: Route;
@@ -33,9 +38,9 @@ export interface IRoute {
     pathDefinition: string; // path with path param names as placeholders, does not include parent routes
     queryParams: IQueryParams;
     viewState: IViewState;
-    beforeEnter: (state: IViewState, store?: any) => boolean | void;
-    beforeExit: (state: IViewState, store?: any) => boolean | void;
-    onEnter: (state: IViewState, store?: any) => boolean | void;
+    beforeEnter(state: IViewState, store?: any): boolean | void;
+    beforeExit(state: IViewState, store?: any): boolean | void;
+    onEnter(state: IViewState, store?: any): boolean | void;
 }
 
 export class Route implements IRoute {
@@ -60,9 +65,9 @@ export class Route implements IRoute {
         this.name = config.name;
         this._params = null;
         this.parentRoute = null;
-        this.beforeEnter = config.beforeEnter || identity;
-        this.onEnter = config.onEnter || identity;
-        this.beforeExit = config.beforeExit || identity;
+        this.beforeEnter = config.beforeEnter != null ? config.beforeEnter : identity;
+        this.onEnter = config.onEnter != null ? config.onEnter : identity;
+        this.beforeExit = config.beforeExit != null ? config.beforeExit : identity;
         this._queryParams = null;
         this._appendChildRoutes(config.children);
     }
@@ -103,8 +108,8 @@ export class Route implements IRoute {
             path: this.path,
             params: this.params,
             query: this.queryParams,
-            view: this
-        }
+            route: this,
+        };
     }
 
     getLifecycleCallbackList(lifecycleName: string): ILifecycleCallback[] {
@@ -142,5 +147,5 @@ export interface IViewState {
     path: string;
     params: IPathParams;
     query: IQueryParams;
-    view: Route;
+    route: Route;
 }

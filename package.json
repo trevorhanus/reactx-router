@@ -45,6 +45,7 @@
         "react-test-renderer": "^15.6.1",
         "sinon": "^3.2.1",
         "ts-node": "^3.3.0",
+        "tslint-config-gravity": "^1.0.1",
         "webpack": "^3.5.5"
     }
 }

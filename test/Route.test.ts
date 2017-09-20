@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Route} from '../../src/router/Route';
+import {Route} from '../src/Route';
 import {TestComponent} from './TestComponent';
 
 describe('Route', () => {

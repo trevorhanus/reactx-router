@@ -1,9 +1,9 @@
+import { expect } from 'chai';
+import { mount } from 'enzyme';
 import * as React from 'react';
-import {expect} from 'chai';
-import {mount} from 'enzyme';
-import {Link} from '../../../src/router/components/Link';
-import {router} from '../../../src/router/Router';
-import {Route} from '../../../src/router/Route';
+import { Link } from '../../src/components/Link';
+import { Route } from '../../src/Route';
+import { router } from '../../src/Router';
 
 describe('Link Component', () => {
 
@@ -11,7 +11,7 @@ describe('Link Component', () => {
         const route: any = new Route({
             name: 'test',
             path: '/',
-            component: () => <div>test</div>
+            component: () => <div>test</div>,
         });
         router.start([route]);
         const wrapper = mount(<Link name="test">test</Link>);

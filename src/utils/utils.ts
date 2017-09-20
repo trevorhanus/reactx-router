@@ -1,4 +1,4 @@
-import {IPathParams, IQueryParams} from '../router/IParams';
+import { IPathParams, IQueryParams } from '../IParams';
 
 export function invariant(check: boolean, message): void {
     if (check) {
@@ -22,6 +22,10 @@ export function warn(message: string): void {
     console.warn(`[reactx] Warning: ${message}`);
 }
 
+export function isOr<T>(val: T, orVal: T): T {
+    return val != null ? val : orVal;
+}
+
 export function buildPathParamsObject(path: string, values: string[]): IQueryParams {
     const urlParamTokens = path.match(/:[\w]+/g) || [];
     const pathParams = {};
@@ -36,14 +40,15 @@ export function replacePathParams(path: string, params?: IPathParams): string {
     const urlParamTokens = path.match(/:[\w]+/g) || [];
     if (urlParamTokens.length === 0) return path;
 
+    let replacedPath = path;
     urlParamTokens.forEach(token => {
         const name = token.replace(':', '');
         const val = params[name];
         invariant(isNullOrUndefined(val), `url params are required to build path for route ${path}`);
-        path = path.replace(token, val);
+        replacedPath = replacedPath.replace(token, val);
     });
 
-    return path;
+    return replacedPath;
 }
 
 export function urlEncodeQueryParams(queryParams: IQueryParams): string {

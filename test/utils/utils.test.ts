@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {isNullOrUndefined, replacePathParams} from "../../src/utils/utils";
-import {IPathParams} from '../../src/router/IParams';
+import {IPathParams} from '../../src/IParams';
 
 describe('Utils', () => {
 
