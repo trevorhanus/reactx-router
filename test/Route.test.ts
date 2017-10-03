@@ -1,6 +1,6 @@
-import {expect} from 'chai';
-import {Route} from '../src/Route';
-import {TestComponent} from './TestComponent';
+import { expect } from 'chai';
+import { Route } from '../src/Route';
+import { TestComponent } from './TestComponent';
 
 describe('Route', () => {
 
@@ -14,14 +14,14 @@ describe('Route', () => {
             expect(() => {
                 new Route({
                     name: 'test',
-                    route: '/home'
+                    route: '/home',
                 } as any);
             }).to.throw();
 
             expect(() => {
                 new Route({
                     name: 'test',
-                    component: 'test'
+                    component: 'test',
                 } as any);
             }).to.throw();
         });
@@ -30,12 +30,28 @@ describe('Route', () => {
             const r = new Route({
                 name: 'home',
                 path: '/home',
-                component: TestComponent
+                component: TestComponent,
             });
             expect(r).to.be.ok;
             expect(r.path).to.equal('/home');
             expect(r.name).to.equal('home');
             expect(r.component).to.equal(TestComponent);
+        });
+    });
+
+    describe('query params', () => {
+
+        it('only accepts the query params in the accepted list', () => {
+            const r = new Route({
+                name: 'home',
+                path: '/home',
+                component: TestComponent,
+                acceptedQueryParams: ['foo'],
+            });
+            r.updateParams(null, {bar: 'baz'});
+            expect(r.queryParams).to.deep.equal({});
+            r.updateParams(null, {foo: 'bar'});
+            expect(r.queryParams).to.deep.equal({foo: 'bar'});
         });
     });
 
@@ -45,7 +61,7 @@ describe('Route', () => {
             const route = new Route({
                 name: 'test',
                 path: '/tests/:testId',
-                component: TestComponent
+                component: TestComponent,
             });
             route.updateParams({testId: '1234'});
             expect(route.pathDefinition).to.equal('/tests/:testId');
@@ -59,13 +75,13 @@ describe('Route', () => {
             const childRoute = new Route({
                 name: 'test',
                 path: '/tests/:testId',
-                component: TestComponent
+                component: TestComponent,
             });
             const parentRoute = new Route({
                 name: 'index',
                 path: '/index',
                 component: TestComponent,
-                children: [childRoute]
+                children: [childRoute],
             });
             childRoute.updateParams({testId: '1234'});
             expect(childRoute.pathDefinition).to.equal('/tests/:testId');
@@ -79,13 +95,13 @@ describe('Route', () => {
             const childRoute = new Route({
                 name: 'test',
                 path: '/tests/:testId',
-                component: TestComponent
+                component: TestComponent,
             });
             const parentRoute = new Route({
                 name: 'index',
                 path: '/merchants/:merchantId',
                 component: TestComponent,
-                children: [childRoute]
+                children: [childRoute],
             });
             childRoute.updateParams({testId: '5678', merchantId: '1234'});
             expect(childRoute.pathDefinition).to.equal('/tests/:testId');

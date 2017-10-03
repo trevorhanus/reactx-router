@@ -1,3 +1,4 @@
+import { pick as _pick } from 'lodash';
 import { action, computed, observable } from 'mobx';
 import * as path from 'path';
 import { IPathParams, IQueryParams } from './IParams';
@@ -58,7 +59,7 @@ export class Route implements IRoute {
 
     constructor(config: IRouteConfig) {
         invariant(isNullOrUndefined([config.component, config.name, config.path]), 'route config must have name, route, and component props.');
-        this.acceptedQueryParams = config.acceptedQueryParams || [];
+        this.acceptedQueryParams = config.acceptedQueryParams;
         this.children = [];
         this.component = config.component;
         this.pathDefinition = config.path;
@@ -127,8 +128,9 @@ export class Route implements IRoute {
         if (!isNullOrUndefined(params)) {
             this._params = params;
         }
-        if (!isNullOrUndefined(query)) {
-            this._queryParams = query;
+        if (query != null) {
+            const accepted = this.acceptedQueryParams;
+            this._queryParams = accepted != null ? _pick(query, accepted) : query;
         }
     }
 
