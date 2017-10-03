@@ -116,8 +116,13 @@ export class Router implements IRouter {
     @action
     private _handleDirectorCallback(route: Route, ...urlParamsArray: string[]): void {
         const params = buildPathParamsObject(route.fullPathDefinition, urlParamsArray);
-        const decodedSearch = decodeURIComponent(window.location.search);
-        const queryParamsObject = queryString.parse(decodedSearch);
+        let queryParamsObject: any;
+        try {
+            const decodedSearch = decodeURIComponent(window.location.search);
+            queryParamsObject = queryString.parse(decodedSearch);
+        } catch (e) {
+            queryParamsObject = {};
+        }
         this.goTo(route.name, params, queryParamsObject);
     }
 

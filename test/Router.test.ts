@@ -87,6 +87,23 @@ describe('Router', () => {
             expect(router.currentViewState.query).to.deep.equal({foo: 'JavaScript_шеллы'});
         });
 
+        it('ignores query params when URI string is malformed', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+            window.history.pushState(null, null, '/profile?stuff=trevor%E0%A4%A');
+            router.start([home, user]);
+            expect(router.currentViewState.query).to.deep.equal({});
+        });
+
         it('throws when multiple non-nested routes have the same path', () => {
             const index: Route = new Route({
                 name: 'index',
