@@ -44,6 +44,49 @@ describe('Router', () => {
             expect(router.currentPath).to.equal('/home');
         });
 
+        it('starts with query params', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/home',
+                component: TestComponent,
+            });
+            window.history.pushState(null, null, '/home?foo=bar');
+            router.start([home]);
+            expect(router.currentPath).to.equal('/home');
+            expect(router.currentViewState.query).to.deep.equal({foo: 'bar'});
+        });
+
+        it('starts with encoded query params', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/home',
+                component: TestComponent,
+            });
+            window.history.pushState(null, null, '/home?foo%3Dbar');
+            router.start([home]);
+            expect(router.currentPath).to.equal('/home');
+            expect(router.currentViewState.query).to.deep.equal({foo: 'bar'});
+        });
+
+        it('decodes encoded query params', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+            window.history.pushState(null, null, '/profile?foo=JavaScript_%D1%88%D0%B5%D0%BB%D0%BB%D1%8B');
+            router.start([home, user]);
+            expect(router.currentViewState.query).to.deep.equal({foo: 'JavaScript_шеллы'});
+        });
+
         it('throws when multiple non-nested routes have the same path', () => {
             const index: Route = new Route({
                 name: 'index',
@@ -140,6 +183,24 @@ describe('Router', () => {
             expect(router.currentPath).to.equal('/profiles/test_id');
             router.goTo('home');
             expect(router.currentPath).to.equal('/');
+        });
+
+        it('encodes query param values', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+            window.history.pushState(null, null, '/');
+            router.start([home, user]);
+            router.goTo('profile', null, {foo: 'JavaScript_шеллы'});
+            expect(window.location.search).to.equal('?foo=JavaScript_%D1%88%D0%B5%D0%BB%D0%BB%D1%8B');
         });
     });
 

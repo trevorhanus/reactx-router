@@ -52,14 +52,15 @@ export function replacePathParams(path: string, params?: IPathParams): string {
 }
 
 export function urlEncodeQueryParams(queryParams: IQueryParams): string {
-    if (isNullOrUndefined(queryParams) || isEmptyObject(queryParams)) return '';
+    if (queryParams == null || isEmptyObject(queryParams)) return '';
 
     const queryPairs = Object.keys(queryParams).map(name => {
         const val = queryParams[name];
-        return `${name}=${val}`;
+        const encodedVal = encodeURIComponent(val.toString());
+        return `${name}=${encodedVal}`;
     });
 
-    return '?' + encodeURIComponent(queryPairs.join('&'));
+    return '?' + queryPairs.join('&');
 }
 
 export function isEmptyObject(val?: any): boolean {

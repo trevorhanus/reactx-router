@@ -2,6 +2,17 @@
 
 A react router that works well with mobx.
 
+### Overview
+
+*paraphrased from Angular's docs*
+
+Traditional web applications utilize the browser's familiar navigation model:
+* Enter a url in the address bar and the browser loads that page.
+* Click on links on the page and the browser navigates the url to that page and loads it.
+* Click the back and forward button and the browser navigates to the pages in your history.
+
+The Reactx-
+
 ### Installing
 
 ```bash
