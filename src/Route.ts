@@ -54,8 +54,8 @@ export class Route implements IRoute {
     beforeEnter: (state: IViewState, store?: any) => boolean | void;
     onEnter: (state: IViewState, store?: any) => void;
     beforeExit: (state: IViewState, store?: any) => boolean | void;
-    @observable private _params: IPathParams;
-    @observable private _queryParams: IQueryParams;
+    @observable.ref private _params: IPathParams;
+    @observable.ref private _queryParams: IQueryParams;
 
     constructor(config: IRouteConfig) {
         invariant(isNullOrUndefined([config.component, config.name, config.path]), 'route config must have name, route, and component props.');
