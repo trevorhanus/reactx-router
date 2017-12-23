@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { mount } from 'enzyme';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import {Router as RouterComponent } from '../../src/components/RouterComponent';
+import { Router as RouterComponent } from '../../src/components/RouterComponent';
 import { Route } from '../../src/Route';
 import { Router } from '../../src/Router';
 
