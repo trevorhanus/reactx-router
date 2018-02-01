@@ -53,7 +53,7 @@ describe('Router', () => {
             });
             window.history.pushState(null, null, '/home?foo=bar');
             router.start([home]);
-            expect(router.currentPath).to.equal('/home');
+            expect(router.currentPath).to.equal('/home?foo=bar');
             expect(router.currentViewState.query).to.deep.equal({foo: 'bar'});
         });
 
@@ -66,7 +66,7 @@ describe('Router', () => {
             });
             window.history.pushState(null, null, '/home?foo%3Dbar');
             router.start([home]);
-            expect(router.currentPath).to.equal('/home');
+            expect(router.currentPath).to.equal('/home?foo=bar');
             expect(router.currentViewState.query).to.deep.equal({foo: 'bar'});
         });
 
@@ -218,6 +218,30 @@ describe('Router', () => {
             router.start([home, user]);
             router.goTo('profile', null, {foo: 'JavaScript_шеллы'});
             expect(window.location.search).to.equal('?foo=JavaScript_%D1%88%D0%B5%D0%BB%D0%BB%D1%8B');
+        });
+
+        it('resets path and query params when returning to a route', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+            window.history.pushState(null, null, '/');
+            router.start([home, user]);
+            router.goTo('profile', null, {foo: 'JavaScript_шеллы'});
+            expect(window.location.search).to.equal('?foo=JavaScript_%D1%88%D0%B5%D0%BB%D0%BB%D1%8B');
+            // now goTo a different route with no params
+            router.goTo('home');
+            expect(window.location.search).to.equal('');
+            // now return to profile with no params
+            router.goTo('profile');
+            expect(window.location.search).to.equal('');
         });
     });
 

@@ -80,7 +80,7 @@ describe('Router Component', () => {
         });
         window.history.pushState(null, null, '/1234/5678');
         router.start([index]);
-        expect(router.currentRoute.fullPath).to.equal('/1234/5678');
+        expect(router.currentPath).to.equal('/1234/5678');
         const wrapper = mount(<RouterComponent router={router} />);
         expect(wrapper.contains(<div>index</div>)).to.be.true;
         expect(wrapper.contains(<div>nested</div>)).to.be.true;

@@ -48,10 +48,8 @@ describe('Route', () => {
                 component: TestComponent,
                 acceptedQueryParams: ['foo'],
             });
-            r.updateParams(null, {bar: 'baz'});
-            expect(r.queryParams).to.deep.equal({});
-            r.updateParams(null, {foo: 'bar'});
-            expect(r.queryParams).to.deep.equal({foo: 'bar'});
+            expect(r.buildUri(null, {bar: 'baz'})).to.equal('/home');
+            expect(r.buildUri(null, {foo: 'bar'})).to.equal('/home?foo=bar');
         });
     });
 
@@ -63,12 +61,10 @@ describe('Route', () => {
                 path: '/tests/:testId',
                 component: TestComponent,
             });
-            route.updateParams({testId: '1234'});
-            expect(route.pathDefinition).to.equal('/tests/:testId');
-            expect(route.fullPathDefinition).to.equal('/tests/:testId');
-            expect(route.path).to.equal('/tests/1234');
-            expect(route.fullPath).to.equal('/tests/1234');
-            expect(route.pathAndQuery).to.equal('/tests/1234');
+            const uri = route.buildUri({testId: '1234'});
+            expect(uri).to.equal('/tests/1234');
+            expect(route.path).to.equal('/tests/:testId');
+            expect(route.fullPath).to.equal('/tests/:testId');
         });
 
         it('with parent route', () => {
@@ -83,12 +79,10 @@ describe('Route', () => {
                 component: TestComponent,
                 children: [childRoute],
             });
-            childRoute.updateParams({testId: '1234'});
-            expect(childRoute.pathDefinition).to.equal('/tests/:testId');
-            expect(childRoute.fullPathDefinition).to.equal('/index/tests/:testId');
-            expect(childRoute.path).to.equal('/tests/1234');
-            expect(childRoute.fullPath).to.equal('/index/tests/1234');
-            expect(childRoute.pathAndQuery).to.equal('/index/tests/1234');
+            const uri = childRoute.buildUri({testId: '1234'});
+            expect(uri).to.equal('/index/tests/1234');
+            expect(childRoute.path).to.equal('/tests/:testId');
+            expect(childRoute.fullPath).to.equal('/index/tests/:testId');
         });
 
         it('with path param in parent route', () => {
@@ -103,12 +97,10 @@ describe('Route', () => {
                 component: TestComponent,
                 children: [childRoute],
             });
-            childRoute.updateParams({testId: '5678', merchantId: '1234'});
-            expect(childRoute.pathDefinition).to.equal('/tests/:testId');
-            expect(childRoute.fullPathDefinition).to.equal('/merchants/:merchantId/tests/:testId');
-            expect(childRoute.path).to.equal('/tests/5678');
-            expect(childRoute.fullPath).to.equal('/merchants/1234/tests/5678');
-            expect(childRoute.pathAndQuery).to.equal('/merchants/1234/tests/5678');
+            const uri = childRoute.buildUri({testId: '5678', merchantId: '1234'});
+            expect(childRoute.path).to.equal('/tests/:testId');
+            expect(childRoute.fullPath).to.equal('/merchants/:merchantId/tests/:testId');
+            expect(uri).to.equal('/merchants/1234/tests/5678');
         });
     });
 });

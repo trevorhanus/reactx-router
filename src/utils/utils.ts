@@ -1,4 +1,4 @@
-import { IPathParams, IQueryParams } from '../IParams';
+import { IPathParams, IQueryParams } from '../interfaces';
 
 export function invariant(check: boolean, message): void {
     if (check) {

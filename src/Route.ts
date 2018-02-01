@@ -1,116 +1,70 @@
 import { pick as _pick } from 'lodash';
-import { action, computed, observable } from 'mobx';
 import * as path from 'path';
-import { IPathParams, IQueryParams } from './IParams';
-import {
-    identity,
-    invariant,
-    isNullOrUndefined,
-    replacePathParams,
-    urlEncodeQueryParams,
-} from './utils/utils';
-
-export type ILifecycleCallback = (state: IViewState, store?: any) => boolean | void;
-export type INonblockingLifecycleCallback = (state: IViewState, store?: any) => void;
-
-export interface IRouteConfig {
-    acceptedQueryParams?: string[];
-    children?: Route[];
-    component: React.ComponentType<any>;
-    name: string;
-    path: string;
-    beforeEnter?: ILifecycleCallback;
-    onEnter?: INonblockingLifecycleCallback;
-    beforeExit?: ILifecycleCallback;
-}
-
-export interface IRoute {
-    acceptedQueryParams: string[]; // list of accepted query params, anything else will be ignored
-    children: Route[];
-    component: React.ComponentType<any>;
-    fullPath: string; // path with path params replaced, includes any parent paths
-    fullPathDefinition: string; // path with path param names as placeholders, includes all parent routes
-    getLifecycleCallbackList(lifecycleName: string): ILifecycleCallback[]; // a list of callbacks with the top-most route's callback at index 0
-    name: string; // unique name
-    params: IPathParams;
-    parentRoute: Route;
-    path: string; // path with path params replaced, does not include parent. always starts with a '/'
-    pathAndQuery: string; // string with the path and query params concatenated
-    pathDefinition: string; // path with path param names as placeholders, does not include parent routes
-    queryParams: IQueryParams;
-    viewState: IViewState;
-    beforeEnter(state: IViewState, store?: any): boolean | void;
-    beforeExit(state: IViewState, store?: any): boolean | void;
-    onEnter(state: IViewState, store?: any): boolean | void;
-}
+import { identity, invariant, isNullOrUndefined, replacePathParams, urlEncodeQueryParams } from './utils/utils';
+import { ILifecycleCallback, INonblockingLifecycleCallback, IRoute, IRouteConfig, IPathParams, IQueryParams } from './interfaces';
 
 export class Route implements IRoute {
-    acceptedQueryParams: string[];
-    children: Route[];
-    component: React.ComponentType<any>;
-    name: string;
-    parentRoute: Route;
-    pathDefinition: string;
-    beforeEnter: (state: IViewState, store?: any) => boolean | void;
-    onEnter: (state: IViewState, store?: any) => void;
-    beforeExit: (state: IViewState, store?: any) => boolean | void;
-    @observable.ref private _params: IPathParams;
-    @observable.ref private _queryParams: IQueryParams;
+    private _name: string;
+    private _path: string;
+    private _component: React.ComponentType<any>;
+    private _acceptedQueryParams: string[];
+    private _children: IRoute[];
+    private _parentRoute: IRoute;
+    beforeEnter: ILifecycleCallback;
+    onEnter: INonblockingLifecycleCallback;
+    beforeExit: ILifecycleCallback;
 
     constructor(config: IRouteConfig) {
         invariant(isNullOrUndefined([config.component, config.name, config.path]), 'route config must have name, route, and component props.');
-        this.acceptedQueryParams = config.acceptedQueryParams;
-        this.children = [];
-        this.component = config.component;
-        this.pathDefinition = config.path;
-        this.name = config.name;
-        this._params = null;
-        this.parentRoute = null;
+        this._name = config.name;
+        this._component = config.component;
+        this._path = config.path;
+        this._acceptedQueryParams = config.acceptedQueryParams;
+        this._parentRoute = null;
+        this._children = [];
         this.beforeEnter = config.beforeEnter != null ? config.beforeEnter : identity;
         this.onEnter = config.onEnter != null ? config.onEnter : identity;
         this.beforeExit = config.beforeExit != null ? config.beforeExit : identity;
-        this._queryParams = null;
         this._appendChildRoutes(config.children);
     }
 
-    get fullPath(): string {
-        return replacePathParams(this.fullPathDefinition, this.params);
+    get name(): string {
+        return this._name;
     }
 
-    get fullPathDefinition(): string {
-        // need to recursively concatinate parent paths
-        return this.parentRoute ? path.join(this.parentRoute.fullPathDefinition, this.pathDefinition) : this.pathDefinition;
-    }
-
-    @computed
-    get params(): IPathParams {
-        return this._params || {};
-    }
-
-    @computed
     get path(): string {
-        // need to recursively concatinate parent paths
-        return replacePathParams(this.pathDefinition, this.params);
+        return this._path;
     }
 
-    @computed
-    get pathAndQuery(): string {
-        return this.fullPath + urlEncodeQueryParams(this.queryParams);
+    get component(): React.ComponentType<any> {
+        return this._component;
     }
 
-    @computed
-    get queryParams(): IQueryParams {
-        return this._queryParams || {};
+    get acceptedQueryParams(): string[] {
+        return this._acceptedQueryParams;
     }
 
-    @computed
-    get viewState(): IViewState {
-        return {
-            path: this.path,
-            params: this.params,
-            query: this.queryParams,
-            route: this,
-        };
+    get children(): IRoute[] {
+        return this._children;
+    }
+
+    get parentRoute(): IRoute {
+        return this._parentRoute;
+    }
+
+    get fullPath(): string {
+        return this.parentRoute ? path.join(this.parentRoute.fullPath, this.path) : this.path;
+    }
+
+    buildUri(pathParams: IPathParams = {}, queryParams: IQueryParams = {}, hash: string = ''): string {
+        // first replace the path params
+        let uri = replacePathParams(this.fullPath, pathParams);
+        // now append the queryParams
+        const accepted = this.acceptedQueryParams;
+        const qParams = ( queryParams != null && accepted != null ) ? _pick(queryParams, accepted) : queryParams;
+        uri += urlEncodeQueryParams(qParams);
+        uri += hash != null ? hash : '';
+        return uri;
     }
 
     getLifecycleCallbackList(lifecycleName: string): ILifecycleCallback[] {
@@ -123,31 +77,17 @@ export class Route implements IRoute {
         return callbacks;
     }
 
-    @action
-    updateParams(params?: IPathParams, query?: IQueryParams): void {
-        if (!isNullOrUndefined(params)) {
-            this._params = params;
-        }
-        if (query != null) {
-            const accepted = this.acceptedQueryParams;
-            this._queryParams = accepted != null ? _pick(query, accepted) : query;
-        }
+    setParentRoute(parent: IRoute) {
+        this._parentRoute = parent;
     }
 
-    private _appendChildRoutes(children?: Route[]) {
+    private _appendChildRoutes(children?: IRoute[]) {
         if (isNullOrUndefined(children)) return;
         children.forEach(this._addChildRoute.bind(this));
     }
 
-    private _addChildRoute(route: Route): void {
-        this.children.push(route);
-        route.parentRoute = this;
+    private _addChildRoute(route: IRoute): void {
+        this._children.push(route);
+        route.setParentRoute(this);
     }
-}
-
-export interface IViewState {
-    path: string;
-    params: IPathParams;
-    query: IQueryParams;
-    route: Route;
 }
