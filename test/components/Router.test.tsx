@@ -1,10 +1,13 @@
 import { expect } from 'chai';
-import { mount } from 'enzyme';
+import { mount, configure } from 'enzyme';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import { Router as RouterComponent } from '../../src/components/RouterComponent';
 import { Route } from '../../src/Route';
 import { Router } from '../../src/Router';
+import * as Adaptor from 'enzyme-adapter-react-16';
+
+configure({adapter: new Adaptor()});
 
 interface IIndexProps {
     routerOutlet?: any;
@@ -78,17 +81,21 @@ describe('Router Component', () => {
                 }),
             ],
         });
+
         window.history.pushState(null, null, '/1234/5678');
         router.start([index]);
+
         expect(router.currentPath).to.equal('/1234/5678');
         const wrapper = mount(<RouterComponent router={router} />);
         expect(wrapper.contains(<div>index</div>)).to.be.true;
         expect(wrapper.contains(<div>nested</div>)).to.be.true;
         expect(wrapper.contains(<div>nestednested</div>)).to.be.true;
+
         router.goTo('nested', {nestedId: '1234'});
-        expect(wrapper.contains(<div>index</div>)).to.be.true;
-        expect(wrapper.contains(<div>nested</div>)).to.be.true;
-        expect(wrapper.contains(<div>nestednested</div>)).to.be.false;
+        const wrapper2 = mount(<RouterComponent router={router} />);
+        expect(wrapper2.contains(<div>index</div>)).to.be.true;
+        expect(wrapper2.contains(<div>nested</div>)).to.be.true;
+        expect(wrapper2.contains(<div>nestednested</div>)).to.be.false;
     });
 
     it('renders default 404 component when path is not found', () => {

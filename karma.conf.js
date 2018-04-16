@@ -32,7 +32,7 @@ module.exports = function (config) {
             '**/*.tsx': ['webpack']
         },
         webpack: {
-            devtool: 'eval',
+            devtool: 'inline-source-map',
             module: {
                 loaders: [
                     {
