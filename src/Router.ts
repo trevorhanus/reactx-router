@@ -2,9 +2,9 @@ import { Router as Director } from 'director/build/director';
 import { action, autorun, computed, observable } from 'mobx';
 import * as queryString from 'query-string';
 import { Default404View } from './components/Default404';
-import { IPathParams, IQueryParams, IRoute, IRouter, IViewState } from './interfaces';
-import { buildPathParamsObject, invariant, isNullOrUndefined } from './utils/utils';
+import { ILifeCycleViewStates, IPathParams, IQueryParams, IRoute, IRouter, IViewState } from './interfaces';
 import { Route } from './Route';
+import { buildPathParamsObject, invariant, isNullOrUndefined } from './utils/utils';
 
 export class Router implements IRouter {
     private _notFoundComponent: React.ComponentType<any>;
@@ -53,7 +53,7 @@ export class Router implements IRouter {
             params: this._pathParams,
             query: this._queryParams,
             hash: this._hash,
-            currentRoute: this._currentRoute,
+            route: this._currentRoute,
         };
     }
 
@@ -84,44 +84,93 @@ export class Router implements IRouter {
     }
 
     @action
-    goTo(name: string, params?: IPathParams, query?: IQueryParams, hash?: string) {
+    goTo(name: string, params: IPathParams = {}, query: IQueryParams = {}, hash: string = '') {
+
         const currentRoute = this._currentRoute;
+        const nextRoute = this._routes.get(name);
 
-        const beforeExitResult = !isNullOrUndefined(currentRoute)
-            ? currentRoute.getLifecycleCallbackList('beforeExit').every(cb => {
-                const result = cb(this.currentViewState, this._store);
-                return result !== false;
-            })
-            : true;
+        const currentParams = this._pathParams;
+        const currentQuery = this._queryParams;
+        const currentHash = this._hash;
 
-        if (beforeExitResult === false) {
-            return;
-        }
-
-        const newRoute = this._routes.get(name);
+        const nextParams = params;
+        const nextQuery = query;
+        const nextHash = hash;
 
         // not finding the route is an invariant, since the developer would
         // have called goTo('name') and failed to have set up the route with that name
         // we do not display the 404 page here because the error came from the code base
         // and not the user going to a url that isn't supported
-        invariant(isNullOrUndefined(newRoute), `no route with name ${name} was configured, but router.goTo() was invoked with that name.`);
+        invariant(isNullOrUndefined(nextRoute), `no route with name ${name} was configured, but router.goTo() was invoked with that name.`);
 
-        this._pathParams = params;
-        this._queryParams = query;
-        this._hash = hash;
+        // beforeExit method
 
-        const beforeEnterResult = newRoute.getLifecycleCallbackList('beforeEnter').every(cb => {
-            const result = cb(this.currentViewState, this._store);
-            return !(result === false);
-        });
-        if (beforeEnterResult === false) {
+        const beforeExitViewState: ILifeCycleViewStates = {
+            currentViewState: {
+                route: currentRoute,
+                params: currentParams,
+                query: currentQuery,
+                hash: currentHash,
+            },
+            nextViewState: {
+                route: nextRoute,
+                params: nextParams,
+                query: nextQuery,
+                hash: nextHash,
+            },
+        };
+
+        const beforeExitResult = !isNullOrUndefined(currentRoute)
+            ? currentRoute.getLifecycleCallbackList('beforeExit').every(cb => {
+                const result = cb(beforeExitViewState, this._store);
+                return result !== false;
+            })
+            : true;
+
+        if (beforeExitResult === false) {
+            // stop route transition
             return;
         }
 
-        this._currentRoute = newRoute;
+        // beforeEnter method
 
-        newRoute.getLifecycleCallbackList('onEnter').forEach(cb => {
-            cb(this.currentViewState, this._store);
+        const beforeEnterViewState: ILifeCycleViewStates = beforeExitViewState;
+
+        const beforeEnterResult = nextRoute.getLifecycleCallbackList('beforeEnter').every(cb => {
+            const result = cb(beforeEnterViewState, this._store);
+            return !(result === false);
+        });
+
+        if (beforeEnterResult === false) {
+            // stop route transition
+            return;
+        }
+
+        this._pathParams = nextParams;
+        this._queryParams = nextQuery;
+        this._hash = nextHash;
+
+        this._currentRoute = nextRoute;
+
+        // onEnter method
+
+        const onEnterViewState: ILifeCycleViewStates = {
+            previousViewState: {
+                route: currentRoute,
+                params: currentParams,
+                query: currentQuery,
+                hash: currentHash,
+            },
+            currentViewState: {
+                route: nextRoute,
+                params: nextParams,
+                query: nextQuery,
+                hash: nextHash,
+            },
+        };
+
+        nextRoute.getLifecycleCallbackList('onEnter').forEach(cb => {
+            cb(onEnterViewState, this._store);
         });
     }
 
@@ -176,7 +225,7 @@ export class Router implements IRouter {
 
     private _setupCurrentPathObserver(): void {
         autorun(() => {
-            if (this._currentRoute != null) {
+            if (this._currentRoute != null && this._currentRoute.name !== 'notfound') {
                 const uri = this._currentRoute.buildUri(this._pathParams, this._queryParams, this._hash);
                 const windowUri = window.location.pathname + window.location.search + window.location.hash;
                 if (uri != null && uri !== windowUri) {
