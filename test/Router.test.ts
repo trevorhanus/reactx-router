@@ -57,17 +57,20 @@ describe('Router', () => {
             expect(router.currentViewState.query).to.deep.equal({foo: 'bar'});
         });
 
-        it('starts with encoded query params', () => {
+        it('starts properly with encoded query params', () => {
             const router = new Router();
             const home: any = new Route({
                 name: 'home',
                 path: '/home',
                 component: TestComponent,
             });
-            window.history.pushState(null, null, '/home?foo%3Dbar');
+
+            window.history.pushState(null, null, '/home?foo=%3Dbar');
+
             router.start([home]);
-            expect(router.currentPath).to.equal('/home?foo=bar');
-            expect(router.currentViewState.query).to.deep.equal({foo: 'bar'});
+
+            expect(router.currentPath).to.equal('/home?foo=%3Dbar');
+            expect(router.currentViewState.query).to.deep.equal({foo: '=bar'});
         });
 
         it('decodes encoded query params', () => {
@@ -82,12 +85,15 @@ describe('Router', () => {
                 path: '/profile',
                 component: TestComponent,
             });
+
             window.history.pushState(null, null, '/profile?foo=JavaScript_%D1%88%D0%B5%D0%BB%D0%BB%D1%8B');
+
             router.start([home, user]);
+            expect(router.currentPath).to.equal('/profile?foo=JavaScript_%D1%88%D0%B5%D0%BB%D0%BB%D1%8B');
             expect(router.currentViewState.query).to.deep.equal({foo: 'JavaScript_шеллы'});
         });
 
-        it('ignores query params when URI string is malformed', () => {
+        it('does not decode query params when URI string is malformed', () => {
             const router = new Router();
             const home: any = new Route({
                 name: 'home',
@@ -99,9 +105,34 @@ describe('Router', () => {
                 path: '/profile',
                 component: TestComponent,
             });
+
             window.history.pushState(null, null, '/profile?stuff=trevor%E0%A4%A');
+
             router.start([home, user]);
-            expect(router.currentViewState.query).to.deep.equal({});
+
+            console.log(router.currentViewState.query);
+
+            expect(router.currentViewState.query).to.deep.equal({ stuff: 'trevor%E0%A4%A' });
+        });
+
+        it('decodes query params', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+
+            window.history.pushState(null, null, '/profile?sandwich=peanut%2Bbutter');
+
+            router.start([home, user]);
+
+            expect(router.currentViewState.query.sandwich).to.eq('peanut+butter');
         });
 
         it('throws when multiple non-nested routes have the same path', () => {

@@ -37,7 +37,7 @@ export class Router implements IRouter {
 
     @computed
     get currentPath(): string {
-        return this._currentRoute !== null
+        return this._currentRoute != null
             ? this._currentRoute.buildUri(this._pathParams, this._queryParams, this._hash)
             : null;
     }
@@ -177,13 +177,14 @@ export class Router implements IRouter {
     @action
     private _handleDirectorCallback(route: IRoute, ...urlParamsArray: string[]): void {
         const params = buildPathParamsObject(route.fullPath, urlParamsArray);
+
         let queryParamsObject: any;
         try {
-            const decodedSearch = decodeURIComponent(window.location.search);
-            queryParamsObject = queryString.parse(decodedSearch);
+            queryParamsObject = queryString.parse(window.location.search);
         } catch (e) {
             queryParamsObject = {};
         }
+
         this.goTo(route.name, params, queryParamsObject, window.location.hash);
     }
 

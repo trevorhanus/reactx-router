@@ -2,6 +2,7 @@ import { pick as _pick } from 'lodash';
 import * as path from 'path';
 import { ILifecycleCallback, INonblockingLifecycleCallback, IPathParams, IQueryParams, IRoute, IRouteConfig } from './interfaces';
 import { identity, invariant, isNullOrUndefined, replacePathParams, urlEncodeQueryParams } from './utils/utils';
+import * as queryString from 'query-string';
 
 export class Route implements IRoute {
     private _name: string;
@@ -59,11 +60,20 @@ export class Route implements IRoute {
     buildUri(pathParams: IPathParams = {}, queryParams: IQueryParams = {}, hash: string = ''): string {
         // first replace the path params
         let uri = replacePathParams(this.fullPath, pathParams);
+
         // now append the queryParams
         const accepted = this.acceptedQueryParams;
         const qParams = (queryParams != null && accepted != null) ? _pick(queryParams, accepted) : queryParams;
-        uri += urlEncodeQueryParams(qParams);
-        uri += hash != null ? hash : '';
+        const qString = queryString.stringify(qParams, { encode: true });
+        if (qString != null && qString.length > 0) {
+            uri += '?' + qString;
+        }
+
+        // append hash
+        if (hash != null && hash.length > 0) {
+            uri += '#' + hash;
+        }
+
         return uri;
     }
 
