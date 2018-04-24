@@ -2,7 +2,17 @@ import { Link } from './components/Link';
 import { Router as ReactxRouter } from './components/RouterComponent';
 import { Route } from './Route';
 import { router, Router } from './Router';
-import { IRouteConfig, IViewState, IParams, IQueryParams } from './interfaces';
+
+export {
+    IRoute,
+    IRouteConfig,
+    IViewState,
+    IParams,
+    IQueryParams,
+    ILifeCycleViewStates,
+    ILifecycleCallback,
+    INonBlockingLifecycleCallback
+} from './interfaces';
 
 export {
     Link,
@@ -10,8 +20,4 @@ export {
     Route,
     Router,
     ReactxRouter,
-    IRouteConfig,
-    IViewState,
-    IParams,
-    IQueryParams,
 };

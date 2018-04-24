@@ -2,7 +2,7 @@ import { IPathParams, IQueryParams } from '../interfaces';
 
 export function invariant(check: boolean, message): void {
     if (check) {
-        throw new Error(`[reactx-ui] ${message}`);
+        throw new Error(`[reactx-router] ${message}`);
     }
 }
 
@@ -19,7 +19,7 @@ export function isNullOrUndefined(val: any | any[]) {
 export function identity(): boolean { return true; }
 
 export function warn(message: string): void {
-    console.warn(`[reactx] Warning: ${message}`);
+    console.warn(`[reactx-router] Warning: ${message}`);
 }
 
 export function isOr<T>(val: T, orVal: T): T {

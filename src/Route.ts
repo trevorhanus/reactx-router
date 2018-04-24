@@ -1,6 +1,6 @@
 import { pick as _pick } from 'lodash';
 import * as path from 'path';
-import { ILifecycleCallback, INonblockingLifecycleCallback, IPathParams, IQueryParams, IRoute, IRouteConfig } from './interfaces';
+import { ILifecycleCallback, INonBlockingLifecycleCallback, IPathParams, IQueryParams, IRoute, IRouteConfig } from './interfaces';
 import { identity, invariant, isNullOrUndefined, replacePathParams, urlEncodeQueryParams } from './utils/utils';
 import * as queryString from 'query-string';
 
@@ -12,7 +12,7 @@ export class Route implements IRoute {
     private _children: IRoute[];
     private _parentRoute: IRoute;
     beforeEnter: ILifecycleCallback;
-    onEnter: INonblockingLifecycleCallback;
+    onEnter: INonBlockingLifecycleCallback;
     beforeExit: ILifecycleCallback;
 
     constructor(config: IRouteConfig) {

@@ -5,7 +5,7 @@ export interface IRouteConfig {
     acceptedQueryParams?: string[];
     children?: IRoute[];
     beforeEnter?: ILifecycleCallback;
-    onEnter?: INonblockingLifecycleCallback;
+    onEnter?: INonBlockingLifecycleCallback;
     beforeExit?: ILifecycleCallback;
 }
 
@@ -55,4 +55,4 @@ export interface IPathParams extends IParams {}
 export interface IQueryParams extends IParams {}
 
 export type ILifecycleCallback = (state: ILifeCycleViewStates, store?: any) => boolean | void;
-export type INonblockingLifecycleCallback = (state: ILifeCycleViewStates, store?: any) => void;
+export type INonBlockingLifecycleCallback = (state: ILifeCycleViewStates, store?: any) => void;

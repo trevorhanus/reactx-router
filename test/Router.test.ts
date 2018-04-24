@@ -110,8 +110,6 @@ describe('Router', () => {
 
             router.start([home, user]);
 
-            console.log(router.currentViewState.query);
-
             expect(router.currentViewState.query).to.deep.equal({ stuff: 'trevor%E0%A4%A' });
         });
 
