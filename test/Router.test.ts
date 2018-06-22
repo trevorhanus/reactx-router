@@ -152,6 +152,24 @@ describe('Router', () => {
             expect(router.currentViewState.hash).to.eq('#foo');
         });
 
+        it('works with a double hash', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+
+            window.history.pushState(null, null, '/profile?#foo#bar');
+            router.start([home, user]);
+            expect(router.currentViewState.hash).to.eq('#foo#bar');
+        });
+
         it('throws when multiple non-nested routes have the same path', () => {
             const index: Route = new Route({
                 name: 'index',
