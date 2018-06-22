@@ -52,7 +52,7 @@ export class Router implements IRouter {
         return {
             params: this._pathParams,
             query: this._queryParams,
-            hash: this._hash,
+            hash: this._hash[0] !== '#' ? '#' + this._hash : this._hash,
             route: this._currentRoute,
         };
     }
@@ -84,7 +84,10 @@ export class Router implements IRouter {
     }
 
     @action
-    goTo(name: string, params: IPathParams = {}, query: IQueryParams = {}, hash: string = '') {
+    goTo(name: string, params?: IPathParams, query?: IQueryParams, hash?: string) {
+        if (params == null) params = {};
+        if (query == null) query = {};
+        if (hash == null) hash = '';
 
         const currentRoute = this._currentRoute;
         const nextRoute = this._routes.get(name);
@@ -220,6 +223,7 @@ export class Router implements IRouter {
         director.configure({
             notfound: this._handleNotFound.bind(this),
             html5history: true,
+            convert_hash_in_init: false,
         });
         director.init();
     }

@@ -71,7 +71,11 @@ export class Route implements IRoute {
 
         // append hash
         if (hash != null && hash.length > 0) {
-            uri += '#' + hash;
+            if (hash[0] === '#') {
+                uri += hash;
+            } else {
+                uri += '#' + hash;
+            }
         }
 
         return uri;

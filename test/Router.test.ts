@@ -133,6 +133,25 @@ describe('Router', () => {
             expect(router.currentViewState.query.sandwich).to.eq('peanut+butter');
         });
 
+        it('works with hashes', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+
+            window.history.pushState(null, null, '/profile?sandwich=peanut#foo');
+            router.start([home, user]);
+            expect(router.currentViewState.query.sandwich).to.eq('peanut');
+            expect(router.currentViewState.hash).to.eq('#foo');
+        });
+
         it('throws when multiple non-nested routes have the same path', () => {
             const index: Route = new Route({
                 name: 'index',
@@ -271,6 +290,28 @@ describe('Router', () => {
             // now return to profile with no params
             router.goTo('profile');
             expect(window.location.search).to.equal('');
+        });
+
+        it('works with hashes', () => {
+            const router = new Router();
+            const home: any = new Route({
+                name: 'home',
+                path: '/',
+                component: TestComponent,
+            });
+            const user: any = new Route({
+                name: 'profile',
+                path: '/profile',
+                component: TestComponent,
+            });
+
+            window.history.pushState(null, null, '/profile?sandwich=peanut#foo');
+            router.start([home, user]);
+            expect(router.currentViewState.query.sandwich).to.eq('peanut');
+            expect(router.currentViewState.hash).to.eq('#foo');
+            router.goTo('home', null, null, 'stuff');
+            expect(router.currentViewState.query).to.deep.eq({});
+            expect(router.currentViewState.hash).to.eq('#stuff');
         });
     });
 
