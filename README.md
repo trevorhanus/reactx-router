@@ -1,6 +1,6 @@
 # Reactx-Router
 
-A react router that works well with mobx.
+$Name is a react router that works well with mobx.
 
 ### Overview
 
