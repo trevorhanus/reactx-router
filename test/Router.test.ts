@@ -222,6 +222,24 @@ describe('Router', () => {
             router.start([home]);
             expect(router.currentRoute.name).to.equal('notfound');
         });
+
+        it('can call router.goTo from /notfound', () => {
+            const router = new Router();
+
+            const home: any = new Route({
+                name: 'home',
+                path: '/home',
+                component: TestComponent,
+            });
+
+            window.history.pushState(null, null, '/derp');
+            router.start([home]);
+            expect(router.currentRoute.name).to.eq('notfound');
+            expect(router.currentRoute.path).to.eq('/derp');
+
+            router.goTo('home');
+            expect(router.currentRoute.name).to.eq('home');
+        });
     });
 
     describe('Router#goTo', () => {

@@ -67,7 +67,7 @@ export class Router implements IRouter {
 
     @action
     start(routes: Route[], store?: any, notFoundComponent?: React.ComponentType<any>): void {
-        if (!isNullOrUndefined(notFoundComponent)) {
+        if (notFoundComponent != null) {
             this._notFoundComponent = notFoundComponent;
         }
         this._store = store || null;
@@ -104,7 +104,7 @@ export class Router implements IRouter {
         // have called goTo('name') and failed to have set up the route with that name
         // we do not display the 404 page here because the error came from the code base
         // and not the user going to a url that isn't supported
-        invariant(isNullOrUndefined(nextRoute), `no route with name ${name} was configured, but router.goTo() was invoked with that name.`);
+        invariant(nextRoute == null, `no route with name ${name} was configured, but router.goTo() was invoked with that name.`);
 
         // beforeExit method
 
@@ -196,10 +196,12 @@ export class Router implements IRouter {
         // this is invoked when the director instance
         // doesn't have a configured callback for the brower's
         // current location
-        this._currentRoute = {
-            component: this._notFoundComponent,
+
+        this._currentRoute = new Route({
             name: 'notfound',
-        } as IRoute;
+            path: window.location.pathname,
+            component: this._notFoundComponent,
+        });
     }
 
     // initializes a Director instance to route

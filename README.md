@@ -11,7 +11,9 @@ Traditional web applications utilize the browser's familiar navigation model:
 * Click on links on the page and the browser navigates the url to that page and loads it.
 * Click the back and forward button and the browser navigates to the pages in your history.
 
-The Reactx-
+A SPA (Single Page Application) takes a different approach. SPA's use JavaScript to replace the contents of a page base on the current route. This makes the website feel much snappier since the browser does not need to load a new page on every redirect.
+
+Reactx-router is a client-side router that works well with mobx.
 
 ### Installing
 
@@ -58,10 +60,10 @@ You create a new Route for every different view or page in your app. Each route 
 **required** 
 
 **`name: string`**
-> the name of the route. Must be unique for all routes.
+> the name of the route. Must be unique for all routes. The name is used in the `router.goTo(routeName)` method to change the current route.
 
 **`path: string`**
-> path at which this route should be activated. These paths can contain path parameters like so: `/profile/:profileId`. Now, when the browser is pointed at `www.yourdomain.com/profile/1234` this route would be activated with the path parameters of `{ profileId: 1234 }`
+> path at which this route should be activated. These paths can contain path parameters like: `/profile/:profileId`. Now, when the browser is pointed at `www.yourdomain.com/profile/1234` this route would be activated with the path parameters of `{ profileId: 1234 }`
 
 **`component: React.Component | React.StatelessComponent`**
 > the react component to render when this route is active. 
@@ -72,7 +74,7 @@ You create a new Route for every different view or page in your app. Each route 
 > a list of query parameter keys that this route accepts. When this option is set, any query params not in the list will be ignored. Anything is accepted when it is left `undefined`.
 
 **`children: Route[]`**  
-> a list of children Route's. See [Nested Routes](#nested-routes) for more info.
+> a list of child Routes. See [Nested Routes](#nested-routes) for more info.
 
 **`beforeEnter: (viewState: IViewState, store: Store) => boolean | void`**  
 > a lifecycle callback which is invoked just before the router changes to this route. Returning `false` will stop the transition. `viewState` will be the current `viewState`, or the `viewState` before entering this route 

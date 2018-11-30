@@ -9,10 +9,10 @@ export function invariant(check: boolean, message): void {
 export function isNullOrUndefined(val: any | any[]) {
     if (Array.isArray(val)) {
         return !val.every(v => {
-            return v !== null && v !== undefined;
+            return v != null;
         });
     } else {
-        return val === null || val === undefined;
+        return val == null;
     }
 }
 
