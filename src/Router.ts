@@ -4,7 +4,7 @@ import * as queryString from 'query-string';
 import { Default404View } from './components/Default404';
 import { ILifeCycleViewStates, IPathParams, IQueryParams, IRoute, IRouter, IViewState } from './interfaces';
 import { Route } from './Route';
-import { buildPathParamsObject, invariant, isNullOrUndefined, normalizeHash } from './utils/utils';
+import { buildPathParamsObject, invariant, isNullOrUndefined, normalizeHash, warn } from './utils/utils';
 
 export class Router implements IRouter {
     private _notFoundComponent: React.ComponentType<any>;
@@ -32,6 +32,7 @@ export class Router implements IRouter {
 
     @computed
     get currentParams(): IPathParams {
+        warn('router.currentParams is deprecated since it is ambiguous. Use router.currentPathParams or router.currentQueryParams.');
         return this._pathParams;
     }
 
@@ -43,8 +44,13 @@ export class Router implements IRouter {
     @computed
     get currentPath(): string {
         return this._currentRoute != null
-            ? this._currentRoute.buildUri(this._pathParams, this._queryParams, this.currentHash)
+            ? this._currentRoute.buildUri(this.currentPathParams, this.currentQueryParams, this.currentHash)
             : null;
+    }
+
+    @computed
+    get currentQueryParams(): IQueryParams {
+        return this._queryParams;
     }
 
     @computed
@@ -55,8 +61,8 @@ export class Router implements IRouter {
     @computed
     get currentViewState(): IViewState {
         return {
-            params: this._pathParams,
-            query: this._queryParams,
+            params: this.currentPathParams,
+            query: this.currentQueryParams,
             hash: this.currentHash,
             route: this._currentRoute,
         };
