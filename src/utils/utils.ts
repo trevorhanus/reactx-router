@@ -26,6 +26,18 @@ export function isOr<T>(val: T, orVal: T): T {
     return val != null ? val : orVal;
 }
 
+export function normalizeHash(hash: string): string {
+    if (hash == null || hash === '') {
+        return hash;
+    }
+
+    if (!hash.startsWith('#')) {
+        hash = `#${hash}`;
+    }
+
+    return hash;
+}
+
 export function buildPathParamsObject(path: string, values: string[]): IQueryParams {
     const urlParamTokens = path.match(/:[\w]+/g) || [];
     const pathParams = {};

@@ -236,6 +236,11 @@ describe('Router', () => {
             router.start([home]);
             expect(router.currentRoute.name).to.eq('notfound');
             expect(router.currentRoute.path).to.eq('/derp');
+            expect(router.currentViewState).to.deep.include({
+                params: null,
+                query: null,
+                hash: null,
+            });
 
             router.goTo('home');
             expect(router.currentRoute.name).to.eq('home');

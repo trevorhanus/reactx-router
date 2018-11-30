@@ -4,7 +4,7 @@ import * as queryString from 'query-string';
 import { Default404View } from './components/Default404';
 import { ILifeCycleViewStates, IPathParams, IQueryParams, IRoute, IRouter, IViewState } from './interfaces';
 import { Route } from './Route';
-import { buildPathParamsObject, invariant, isNullOrUndefined } from './utils/utils';
+import { buildPathParamsObject, invariant, isNullOrUndefined, normalizeHash } from './utils/utils';
 
 export class Router implements IRouter {
     private _notFoundComponent: React.ComponentType<any>;
@@ -26,6 +26,11 @@ export class Router implements IRouter {
     }
 
     @computed
+    get currentHash(): string {
+        return normalizeHash(this._hash);
+    }
+
+    @computed
     get currentParams(): IPathParams {
         return this._pathParams;
     }
@@ -38,7 +43,7 @@ export class Router implements IRouter {
     @computed
     get currentPath(): string {
         return this._currentRoute != null
-            ? this._currentRoute.buildUri(this._pathParams, this._queryParams, this._hash)
+            ? this._currentRoute.buildUri(this._pathParams, this._queryParams, this.currentHash)
             : null;
     }
 
@@ -52,7 +57,7 @@ export class Router implements IRouter {
         return {
             params: this._pathParams,
             query: this._queryParams,
-            hash: this._hash[0] !== '#' ? '#' + this._hash : this._hash,
+            hash: this.currentHash,
             route: this._currentRoute,
         };
     }
